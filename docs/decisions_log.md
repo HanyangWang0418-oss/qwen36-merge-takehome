@@ -11,7 +11,7 @@ training, no e3 retraining; only work that certainly moves the project forward o
 | 4 | Dev subsets drawn from the official benchmarks **replaced** by independent proxies (MMLU-Pro STEM, SWE-bench Verified sample, Terminal-Bench-Pro sample, ASI seed31415) | task statement: tune on independent dev sets, never on the evaluation items | 0 |
 | 5 | `remap_keys.py` written from vLLM source: fuse `in_proj_q/k/v`→`in_proj_qkv`, rename `unembed_tokens`→`lm_head`; experts `w1/w2/w3` and the `language_model` prefix are handled by vLLM itself | Tinker's export uses its own names; serving would fail otherwise | 0 |
 | 6 | Tinker-sampling pre-screen of base vs e3 on 100 MMLU-Pro STEM questions (8K budget): base 66%, e3 80%, paired Δ +14 [5, 23] | cheap signal on whether e3 is worth keeping; **confound**: base truncated 27/100 vs e3 12/100 at 8K, so re-run at 20K | ≈ $1 |
-| 7 | 20K-budget re-run of the same 100 questions | removes the truncation confound | ≈ $1.5 |
+| 7 | 20K-budget re-run of the same 100 questions: base 83%, e3 89%, paired Δ +6 [-1, 13] (p≈0.07, not significant); e3 used 56% of base's output tokens, truncation 1 vs 10 | the 8K gap was mostly truncation; e3 is at least not harmful and is markedly more token-efficient on this proxy | ≈ $1.5 |
 
 Open for the owner: GPU box (2× A100) SSH; OpenAI key (HLE judge); ASI judge key; interviewer confirmations;
 whether to train the control experts (~$100) and whether to pursue e3 RFT.

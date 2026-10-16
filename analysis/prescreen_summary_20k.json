@@ -1,0 +1,33 @@
+{
+ "base": {
+  "model": "Qwen/Qwen3.6-35B-A3B",
+  "n": 100,
+  "accuracy": 0.83,
+  "errors": 0,
+  "truncated": 10,
+  "output_tokens": 724787,
+  "est_cost_usd": 0.9675906449999999,
+  "seconds": 327
+ },
+ "e3": {
+  "model": "tinker://df9e7c47-fa5c-597e-a8d5-ea20edaa9035:train:0/sampler_weights/e3_reasoning_r32_s42_third_step00151",
+  "n": 100,
+  "accuracy": 0.89,
+  "errors": 0,
+  "truncated": 1,
+  "output_tokens": 405928,
+  "est_cost_usd": 0.54191388,
+  "seconds": 334
+ },
+ "paired_delta": {
+  "delta_mean": 0.06,
+  "ci_low": -0.01,
+  "ci_high": 0.13,
+  "p_delta_le_0": 0.0665,
+  "n_tasks": 100,
+  "n_boot": 10000,
+  "n_wins": 10,
+  "n_losses": 4,
+  "n_ties": 86
+ }
+}

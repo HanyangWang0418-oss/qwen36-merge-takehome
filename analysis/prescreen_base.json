@@ -2,12 +2,12 @@
  "summary": {
   "model": "Qwen/Qwen3.6-35B-A3B",
   "n": 100,
-  "accuracy": 0.66,
+  "accuracy": 0.83,
   "errors": 0,
-  "truncated": 27,
-  "output_tokens": 424130,
-  "est_cost_usd": 0.56621355,
-  "seconds": 166
+  "truncated": 10,
+  "output_tokens": 724787,
+  "est_cost_usd": 0.9675906449999999,
+  "seconds": 327
  },
  "rows": [
   {
@@ -16,7 +16,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 955,
+   "n_tokens": 1848,
    "truncated": false,
    "status": "ok"
   },
@@ -26,7 +26,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 3282,
+   "n_tokens": 6070,
    "truncated": false,
    "status": "ok"
   },
@@ -36,7 +36,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 953,
+   "n_tokens": 1223,
    "truncated": false,
    "status": "ok"
   },
@@ -46,7 +46,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 5839,
+   "n_tokens": 3158,
    "truncated": false,
    "status": "ok"
   },
@@ -56,7 +56,7 @@
    "gold": "H",
    "pred": "H",
    "correct": true,
-   "n_tokens": 4054,
+   "n_tokens": 5849,
    "truncated": false,
    "status": "ok"
   },
@@ -66,7 +66,7 @@
    "gold": "A",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -74,9 +74,9 @@
    "id": 8008,
    "category": "math",
    "gold": "B",
-   "pred": "C",
-   "correct": false,
-   "n_tokens": 6038,
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 2512,
    "truncated": false,
    "status": "ok"
   },
@@ -86,7 +86,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 1080,
+   "n_tokens": 1219,
    "truncated": false,
    "status": "ok"
   },
@@ -96,7 +96,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 2885,
+   "n_tokens": 1758,
    "truncated": false,
    "status": "ok"
   },
@@ -106,7 +106,7 @@
    "gold": "H",
    "pred": "H",
    "correct": true,
-   "n_tokens": 1182,
+   "n_tokens": 1236,
    "truncated": false,
    "status": "ok"
   },
@@ -116,7 +116,7 @@
    "gold": "H",
    "pred": "H",
    "correct": true,
-   "n_tokens": 603,
+   "n_tokens": 869,
    "truncated": false,
    "status": "ok"
   },
@@ -126,7 +126,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 3786,
+   "n_tokens": 3430,
    "truncated": false,
    "status": "ok"
   },
@@ -134,20 +134,20 @@
    "id": 3854,
    "category": "chemistry",
    "gold": "D",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "D",
+   "correct": true,
+   "n_tokens": 13700,
+   "truncated": false,
    "status": "ok"
   },
   {
    "id": 4635,
    "category": "chemistry",
    "gold": "J",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 8616,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -156,7 +156,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 1495,
+   "n_tokens": 1318,
    "truncated": false,
    "status": "ok"
   },
@@ -166,7 +166,7 @@
    "gold": "D",
    "pred": "D",
    "correct": true,
-   "n_tokens": 868,
+   "n_tokens": 654,
    "truncated": false,
    "status": "ok"
   },
@@ -174,10 +174,10 @@
    "id": 9339,
    "category": "physics",
    "gold": "F",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 10242,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -186,7 +186,7 @@
    "gold": "F",
    "pred": "F",
    "correct": true,
-   "n_tokens": 4948,
+   "n_tokens": 5659,
    "truncated": false,
    "status": "ok"
   },
@@ -196,7 +196,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 1435,
+   "n_tokens": 6218,
    "truncated": false,
    "status": "ok"
   },
@@ -206,7 +206,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 2044,
+   "n_tokens": 5427,
    "truncated": false,
    "status": "ok"
   },
@@ -216,7 +216,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 1142,
+   "n_tokens": 1148,
    "truncated": false,
    "status": "ok"
   },
@@ -224,20 +224,20 @@
    "id": 4191,
    "category": "chemistry",
    "gold": "F",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 7234,
+   "truncated": false,
    "status": "ok"
   },
   {
    "id": 11882,
    "category": "engineering",
    "gold": "A",
-   "pred": null,
+   "pred": "H",
    "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "n_tokens": 9677,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -246,7 +246,7 @@
    "gold": "G",
    "pred": "C",
    "correct": false,
-   "n_tokens": 2107,
+   "n_tokens": 2567,
    "truncated": false,
    "status": "ok"
   },
@@ -256,7 +256,7 @@
    "gold": "D",
    "pred": "D",
    "correct": true,
-   "n_tokens": 1903,
+   "n_tokens": 7149,
    "truncated": false,
    "status": "ok"
   },
@@ -266,7 +266,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 4096,
+   "n_tokens": 8795,
    "truncated": false,
    "status": "ok"
   },
@@ -276,7 +276,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 1939,
+   "n_tokens": 1888,
    "truncated": false,
    "status": "ok"
   },
@@ -284,9 +284,9 @@
    "id": 8534,
    "category": "math",
    "gold": "G",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -294,10 +294,10 @@
    "id": 4401,
    "category": "chemistry",
    "gold": "I",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 17958,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -306,7 +306,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 1481,
+   "n_tokens": 1940,
    "truncated": false,
    "status": "ok"
   },
@@ -314,9 +314,9 @@
    "id": 6682,
    "category": "health",
    "gold": "H",
-   "pred": "H",
-   "correct": true,
-   "n_tokens": 3663,
+   "pred": "A",
+   "correct": false,
+   "n_tokens": 7117,
    "truncated": false,
    "status": "ok"
   },
@@ -326,7 +326,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 1432,
+   "n_tokens": 1629,
    "truncated": false,
    "status": "ok"
   },
@@ -334,9 +334,9 @@
    "id": 6721,
    "category": "health",
    "gold": "I",
-   "pred": "E",
-   "correct": false,
-   "n_tokens": 2881,
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 2808,
    "truncated": false,
    "status": "ok"
   },
@@ -346,7 +346,7 @@
    "gold": "D",
    "pred": "D",
    "correct": true,
-   "n_tokens": 3164,
+   "n_tokens": 2274,
    "truncated": false,
    "status": "ok"
   },
@@ -354,20 +354,20 @@
    "id": 10002,
    "category": "physics",
    "gold": "G",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 17380,
+   "truncated": false,
    "status": "ok"
   },
   {
    "id": 8284,
    "category": "math",
    "gold": "H",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 16769,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -376,7 +376,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 2234,
+   "n_tokens": 15278,
    "truncated": false,
    "status": "ok"
   },
@@ -386,7 +386,7 @@
    "gold": "H",
    "pred": "H",
    "correct": true,
-   "n_tokens": 667,
+   "n_tokens": 894,
    "truncated": false,
    "status": "ok"
   },
@@ -394,19 +394,19 @@
    "id": 11902,
    "category": "engineering",
    "gold": "F",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 15585,
+   "truncated": false,
    "status": "ok"
   },
   {
    "id": 4549,
    "category": "chemistry",
    "gold": "B",
-   "pred": null,
+   "pred": "E",
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -416,7 +416,7 @@
    "gold": "E",
    "pred": "I",
    "correct": false,
-   "n_tokens": 2130,
+   "n_tokens": 1959,
    "truncated": false,
    "status": "ok"
   },
@@ -424,9 +424,9 @@
    "id": 11500,
    "category": "engineering",
    "gold": "A",
-   "pred": null,
+   "pred": "H",
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -436,7 +436,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 3456,
+   "n_tokens": 4143,
    "truncated": false,
    "status": "ok"
   },
@@ -446,7 +446,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 2094,
+   "n_tokens": 8208,
    "truncated": false,
    "status": "ok"
   },
@@ -456,7 +456,7 @@
    "gold": "D",
    "pred": "D",
    "correct": true,
-   "n_tokens": 4846,
+   "n_tokens": 2410,
    "truncated": false,
    "status": "ok"
   },
@@ -466,7 +466,7 @@
    "gold": "D",
    "pred": "D",
    "correct": true,
-   "n_tokens": 6785,
+   "n_tokens": 2679,
    "truncated": false,
    "status": "ok"
   },
@@ -476,7 +476,7 @@
    "gold": "F",
    "pred": "F",
    "correct": true,
-   "n_tokens": 1530,
+   "n_tokens": 8136,
    "truncated": false,
    "status": "ok"
   },
@@ -486,7 +486,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 996,
+   "n_tokens": 896,
    "truncated": false,
    "status": "ok"
   },
@@ -494,10 +494,10 @@
    "id": 4647,
    "category": "chemistry",
    "gold": "J",
-   "pred": "G",
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 12487,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -506,7 +506,7 @@
    "gold": "C",
    "pred": "C",
    "correct": true,
-   "n_tokens": 4401,
+   "n_tokens": 5619,
    "truncated": false,
    "status": "ok"
   },
@@ -516,7 +516,7 @@
    "gold": "C",
    "pred": "C",
    "correct": true,
-   "n_tokens": 1955,
+   "n_tokens": 1569,
    "truncated": false,
    "status": "ok"
   },
@@ -526,7 +526,7 @@
    "gold": "C",
    "pred": "C",
    "correct": true,
-   "n_tokens": 3711,
+   "n_tokens": 2302,
    "truncated": false,
    "status": "ok"
   },
@@ -536,7 +536,7 @@
    "gold": "C",
    "pred": "C",
    "correct": true,
-   "n_tokens": 1079,
+   "n_tokens": 879,
    "truncated": false,
    "status": "ok"
   },
@@ -546,7 +546,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 1534,
+   "n_tokens": 8036,
    "truncated": false,
    "status": "ok"
   },
@@ -556,7 +556,7 @@
    "gold": "E",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -566,7 +566,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 2700,
+   "n_tokens": 3566,
    "truncated": false,
    "status": "ok"
   },
@@ -576,7 +576,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 1080,
+   "n_tokens": 948,
    "truncated": false,
    "status": "ok"
   },
@@ -584,10 +584,10 @@
    "id": 9561,
    "category": "physics",
    "gold": "F",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 10394,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -596,7 +596,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 561,
+   "n_tokens": 909,
    "truncated": false,
    "status": "ok"
   },
@@ -606,7 +606,7 @@
    "gold": "H",
    "pred": "H",
    "correct": true,
-   "n_tokens": 7402,
+   "n_tokens": 2021,
    "truncated": false,
    "status": "ok"
   },
@@ -616,7 +616,7 @@
    "gold": "D",
    "pred": "I",
    "correct": false,
-   "n_tokens": 4150,
+   "n_tokens": 1400,
    "truncated": false,
    "status": "ok"
   },
@@ -626,7 +626,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 1575,
+   "n_tokens": 2696,
    "truncated": false,
    "status": "ok"
   },
@@ -636,7 +636,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 1807,
+   "n_tokens": 1219,
    "truncated": false,
    "status": "ok"
   },
@@ -646,7 +646,7 @@
    "gold": "E",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -656,7 +656,7 @@
    "gold": "E",
    "pred": "I",
    "correct": false,
-   "n_tokens": 1609,
+   "n_tokens": 3461,
    "truncated": false,
    "status": "ok"
   },
@@ -666,7 +666,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 2273,
+   "n_tokens": 12605,
    "truncated": false,
    "status": "ok"
   },
@@ -674,10 +674,10 @@
    "id": 8043,
    "category": "math",
    "gold": "I",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 12527,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -686,7 +686,7 @@
    "gold": "D",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -696,7 +696,7 @@
    "gold": "F",
    "pred": "F",
    "correct": true,
-   "n_tokens": 1242,
+   "n_tokens": 1037,
    "truncated": false,
    "status": "ok"
   },
@@ -706,7 +706,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 4549,
+   "n_tokens": 1909,
    "truncated": false,
    "status": "ok"
   },
@@ -716,7 +716,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 1183,
+   "n_tokens": 1106,
    "truncated": false,
    "status": "ok"
   },
@@ -724,19 +724,19 @@
    "id": 9742,
    "category": "physics",
    "gold": "J",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 15290,
+   "truncated": false,
    "status": "ok"
   },
   {
    "id": 3492,
    "category": "biology",
    "gold": "F",
-   "pred": "E",
-   "correct": false,
-   "n_tokens": 1953,
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 9001,
    "truncated": false,
    "status": "ok"
   },
@@ -746,7 +746,7 @@
    "gold": "G",
    "pred": "G",
    "correct": true,
-   "n_tokens": 1213,
+   "n_tokens": 954,
    "truncated": false,
    "status": "ok"
   },
@@ -756,7 +756,7 @@
    "gold": "H",
    "pred": "H",
    "correct": true,
-   "n_tokens": 5874,
+   "n_tokens": 11334,
    "truncated": false,
    "status": "ok"
   },
@@ -766,7 +766,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 6504,
+   "n_tokens": 8628,
    "truncated": false,
    "status": "ok"
   },
@@ -776,7 +776,7 @@
    "gold": "C",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -784,10 +784,10 @@
    "id": 3993,
    "category": "chemistry",
    "gold": "J",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 15179,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -796,7 +796,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 7131,
+   "n_tokens": 7090,
    "truncated": false,
    "status": "ok"
   },
@@ -806,7 +806,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 952,
+   "n_tokens": 1075,
    "truncated": false,
    "status": "ok"
   },
@@ -816,7 +816,7 @@
    "gold": "F",
    "pred": "F",
    "correct": true,
-   "n_tokens": 8092,
+   "n_tokens": 4678,
    "truncated": false,
    "status": "ok"
   },
@@ -824,10 +824,10 @@
    "id": 3109,
    "category": "biology",
    "gold": "D",
-   "pred": "I",
+   "pred": "E",
    "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "n_tokens": 12375,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -836,7 +836,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 2163,
+   "n_tokens": 2632,
    "truncated": false,
    "status": "ok"
   },
@@ -846,7 +846,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 4350,
+   "n_tokens": 4439,
    "truncated": false,
    "status": "ok"
   },
@@ -856,7 +856,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 1796,
+   "n_tokens": 1380,
    "truncated": false,
    "status": "ok"
   },
@@ -866,7 +866,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 5667,
+   "n_tokens": 6473,
    "truncated": false,
    "status": "ok"
   },
@@ -874,10 +874,10 @@
    "id": 9614,
    "category": "physics",
    "gold": "E",
-   "pred": null,
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 16575,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -886,7 +886,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 1873,
+   "n_tokens": 1865,
    "truncated": false,
    "status": "ok"
   },
@@ -894,10 +894,10 @@
    "id": 7971,
    "category": "math",
    "gold": "C",
-   "pred": "H",
-   "correct": false,
-   "n_tokens": 8192,
-   "truncated": true,
+   "pred": "C",
+   "correct": true,
+   "n_tokens": 19071,
+   "truncated": false,
    "status": "ok"
   },
   {
@@ -906,7 +906,7 @@
    "gold": "J",
    "pred": "J",
    "correct": true,
-   "n_tokens": 5240,
+   "n_tokens": 10656,
    "truncated": false,
    "status": "ok"
   },
@@ -916,7 +916,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 7698,
+   "n_tokens": 14523,
    "truncated": false,
    "status": "ok"
   },
@@ -926,7 +926,7 @@
    "gold": "F",
    "pred": "F",
    "correct": true,
-   "n_tokens": 3260,
+   "n_tokens": 3494,
    "truncated": false,
    "status": "ok"
   },
@@ -936,7 +936,7 @@
    "gold": "H",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -946,7 +946,7 @@
    "gold": "A",
    "pred": "A",
    "correct": true,
-   "n_tokens": 332,
+   "n_tokens": 339,
    "truncated": false,
    "status": "ok"
   },
@@ -954,9 +954,9 @@
    "id": 10602,
    "category": "computer science",
    "gold": "C",
-   "pred": "C",
-   "correct": true,
-   "n_tokens": 2923,
+   "pred": "I",
+   "correct": false,
+   "n_tokens": 18965,
    "truncated": false,
    "status": "ok"
   },
@@ -966,7 +966,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 1405,
+   "n_tokens": 2084,
    "truncated": false,
    "status": "ok"
   },
@@ -976,7 +976,7 @@
    "gold": "I",
    "pred": null,
    "correct": false,
-   "n_tokens": 8192,
+   "n_tokens": 20000,
    "truncated": true,
    "status": "ok"
   },
@@ -986,7 +986,7 @@
    "gold": "B",
    "pred": "B",
    "correct": true,
-   "n_tokens": 600,
+   "n_tokens": 1121,
    "truncated": false,
    "status": "ok"
   },
@@ -996,7 +996,7 @@
    "gold": "E",
    "pred": "E",
    "correct": true,
-   "n_tokens": 581,
+   "n_tokens": 636,
    "truncated": false,
    "status": "ok"
   },
@@ -1006,7 +1006,7 @@
    "gold": "I",
    "pred": "I",
    "correct": true,
-   "n_tokens": 535,
+   "n_tokens": 713,
    "truncated": false,
    "status": "ok"
   }
