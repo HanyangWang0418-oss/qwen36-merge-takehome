@@ -1,43 +1,51 @@
-# Evaluation infrastructure: Alibaba Cloud Agent Sandbox (ACS) + Harbor `ack`
+# Evaluation infrastructure: Alibaba Cloud Agent Sandbox 极速版 (E2B-compatible) + Harbor `-e e2b`
 
 Decision (2026-10-16): run the Harbor-based benchmarks (SWE-bench Pro v2-hard, Terminal-Bench 2.0)
-and the asibench docker sandbox on Alibaba Cloud instead of Modal. Reason: price. At the Qwen
-model-card Terminal-Bench spec (32 vCPU / 48 GiB per task) Agent Sandbox "Default" QoS is
-0.078 元/vCPU·h + 0.039 元/GiB·h ≈ 4.4 元/h ≈ $0.60/h per task (mainland), versus ≈ $5.5/h on Modal.
-Disclosure: the SWE-bench Pro locked protocol and the Terminal-Bench leaderboard use Modal; we use
-the same task images, agents, budgets and network policy, but a different sandbox provider. This is
-recorded as "本实验设置" in configs/eval/*.yaml and in the README.
+on Alibaba Cloud **Agent Sandbox 极速版** (Speed Edition, Function-Compute hosted, E2B-compatible API)
+instead of Modal, using Harbor's built-in `e2b` backend. Reason: price (Default QoS, mainland:
+0.078 元/vCPU·h + 0.039 元/GiB·h, i.e. ≈ 4.4 元/h for a 32 vCPU / 48 GiB task vs ≈ $5.5/h on Modal)
+and zero cluster administration. The ACS "容器版" + `-e ack` route is kept as fallback (section at the end).
 
-## What Harbor needs (`-e ack`, src/harbor/environments/ack.py)
-- Any Kubernetes cluster reachable through a kubeconfig (`--ek kubeconfig=~/.kube/acs.yaml --ek namespace=harbor`).
-- Images: either built in-cluster (privileged DinD job, or BuildKit via `--ek use_buildkit=true --ek buildkit_address=tcp://...`) and pushed to a registry (`--ek registry=<acr>.cn-hangzhou.personal.cr.aliyuncs.com/<ns>`), or pre-built images referenced directly.
-- Optional SandboxClaim mode (`--ek use_sandbox_claim=true`) to draw warm sandboxes from a SandboxSet pool.
-- Per-task CPU/memory come from task.toml (`cpus`, `memory_mb`); Terminal-Bench is overridden to 32 / 49152 with harbor's resource flags. ACS rounds unsupported vCPU:memory ratios up and bills the rounded spec; the actual spec is read back from the pod and logged.
+Disclosure: SWE-bench Pro's locked protocol and the Terminal-Bench leaderboard use Modal. We use the
+same task images, agents, budgets and prompts, but a different sandbox provider and a weaker
+network isolation (below). Recorded as "本实验设置" in configs/eval/*.yaml and the README.
 
-## Plan per benchmark
-| benchmark | images | per-task spec | sandbox mode |
-|---|---|---|---|
-| SWE-bench Pro hard-51 | 51 prebuilt `ghcr.io/scaleapi/swe-bench_pro-v2:<id>` (62 GB total) → mirrored once into ACR with `scripts/mirror_images.sh` | 1 vCPU / 4 GiB (task.toml), agent offline, verifier online | plain pods |
-| Terminal-Bench 2.0 | 89 task Dockerfiles built once (BuildKit job or an ECS build box with docker) → ACR | 32 vCPU / 48 GiB, 3 h | plain pods or SandboxSet pool |
-| ASI-Bench | asibench `--sandbox os` needs a Docker daemon → run the asibench CLI on an ECS VM with Docker (not inside Agent Sandbox) | per asibench defaults | ECS |
-| HLE | no sandbox | – | – |
+## Verified facts (probed 2026-10-16 with the project key, region cn-hangzhou)
+| item | result |
+|---|---|
+| API | `https://api.cn-hangzhou.sandbox.aliyuncs.com`, domain `cn-hangzhou.sandbox.aliyuncs.com`; the key is bound to one region (401 elsewhere) |
+| E2B API version | **v1 only**: `POST /sandboxes` works, `POST /v2/sandboxes` → 405. e2b SDK ≥ 2.5x uses v2 → pinned `e2b==2.45.0` (v1 create + Template API). Harbor is installed with `uv tool install harbor==0.24.0 --with e2b==2.45.0` |
+| sandbox boot | ≈ 2.5 s; built-in `code-interpreter-v1` = 2 vCPU / 2 GiB / 15 GiB, Debian 13, bash/python3/git/curl present, no docker, no tmux |
+| commands | foreground + background (`commands.run(background=True)` + `wait()`), files.write/read OK |
+| timeout | `set_timeout(4 h)` accepted → Terminal-Bench's 3 h limit is fine |
+| egress | ghcr.io, pypi.org, github.com reachable; **proxy.golang.org and huggingface.co not reachable** (relevant for SWE-bench Pro Go tasks' verifier: set `GOPROXY=https://goproxy.cn,direct` in the task env) |
+| network policy | `update_network({"allow_internet_access": False})` is accepted but **not enforced** (pypi still 200). Harbor's `allow_internet_access=False` for the agent phase therefore has no effect → disclosed; mitigations: host-side agent variant (`host_mini_swe`, LLM loop on the host, no agent install in the sandbox) and the regrade step on a pristine sandbox |
+| templates | only `Template().from_image(ref, username, password)`; no Dockerfile/steps. Builder needs **pull AND push** rights on the source registry (it pushes the converted image back) → public ghcr/Docker Hub images cannot be used directly; everything goes through our own **ACR** namespace. Fully-qualified refs only (`docker.io/library/...`) |
+| Harbor alias | `e2b` backend builds/looks up alias `{task.short_name}__{sha256(environment dir)[:12]}` ("/"→"__", "."→"-"); Harbor's own build would fail (no credentials), so templates are **pre-built** with `scripts/prebuild_sandbox_templates.py`, which computes the same alias through Harbor's code and builds from ACR with credentials. Harbor then only creates sandboxes |
+| spec limits | not yet probed (needs an ACR image); the default template is 2 vCPU / 2 GiB; TB2 needs 32 vCPU / 48 GiB per the model card → probe before the full run, fall back to the largest allowed spec and disclose |
+
+## Pipeline
+1. **Images → ACR** (ECS build box, or a sandbox with skopeo for the mirror step):
+   `scripts/mirror_images.sh` (51 SWE-bench Pro images, 62 GB compressed, ghcr → ACR, digest-verified) and
+   `scripts/build_tb2_images.sh` (89 Terminal-Bench 2.0 Dockerfiles at the locked commit → `ACR/<task>:<commit8>` + `:latest`).
+   `scripts/lock_images.py` records digests in `data/manifests/images_acr_*.json`.
+2. **Task copies pointing at ACR**: `scripts/prepare_swebench_tasks_acr.py` (rewrites `docker_image` + Dockerfile FROM, digest-pinned) and `scripts/prepare_tb2_tasks_acr.py` (adds `docker_image`). Diffs saved as `ACR_REWRITE.diff` next to the copies.
+3. **Templates**: `scripts/prebuild_sandbox_templates.py <tasks_dir> --cpus N --memory-mb M` (run with `~/.local/share/uv/tools/harbor/bin/python`, needs `E2B_*` and `ACR_USERNAME/ACR_PASSWORD`).
+4. **Run**: `scripts/eval_swebench_pro.sh` / `scripts/eval_terminal_bench.sh` with `HARBOR_ENV=e2b` (default), `E2B_API_KEY/E2B_API_URL/E2B_DOMAIN` exported. Harbor finds the aliases and skips building.
+5. **ASI-Bench**: `asibench --sandbox os` needs a Docker daemon → runs on an ECS VM, not in Agent Sandbox. **HLE**: no sandbox.
 
 ## Model serving
-vLLM with the base + LoRA hot-swap needs ≥ 2 × 80 GB-class GPUs for 256K context. Mainland regions
-offer H20 (96 GB) / A800; H100 only outside the mainland. Options: PAI-DSW/EAS GPU instance, or an ECS
-gn8is/H20 spot instance in the same VPC as the ACS cluster so sandboxes reach the endpoint privately.
-The endpoint host is the only host allowed in the agent-phase network policy.
+vLLM, base + LoRA hot-swap, ≥ 2 × 80 GB-class GPUs for 256K context. Mainland: H20 (96 GB) / A800; H100 only outside the mainland. Place it in the same region (Hangzhou) and expose one HTTPS endpoint; it is the only host the agent may call (enforced by the agent config, not by the sandbox network).
 
-## One-time setup (account owner)
-1. Alibaba Cloud account with billing enabled; RAM user/role for the CLI (`aliyun configure`).
-2. Create an **ACS cluster** in the chosen region (mainland is cheapest; Hong Kong if GPUs/egress matter), enable **Agent Sandbox**: add-ons `acs-virtual-node ≥ 2.17.0`, `ack-agent-sandbox-controller ≥ 0.5.14`, grant `AliyunCSManagedAgentSandboxRole`. (The E2B-compatible gateway, `ack-sandbox-manager` + Ingress + domain + TLS, is NOT required for Harbor, which talks to the Kubernetes API directly.)
-3. Download the cluster kubeconfig to `~/.kube/acs.yaml`; `kubectl get sandboxsets -A` must work.
-4. Create an **ACR** (personal edition is enough) namespace for the task images; docker login credentials → k8s image pull secret in namespace `harbor` (`--ek image_pull_secret=acr-pull`).
-5. Decide the egress policy: sandboxes need public egress for the verifier phase (Go modules, pip) and for image pulls from ACR; agent phase must be restricted to the vLLM host (Harbor applies `network_mode = no-network` + `--allow-agent-host`; ACS enforces via NetworkPolicy, capability to be verified on the first run).
-6. One ECS VM with Docker (8 vCPU is enough) for: mirroring/building images, running `asibench`, and running the harbor CLI itself (avoids the laptop's bandwidth).
+## What the account owner needs to provide
+1. **ACR** (personal edition should suffice since we pass credentials; EE only if the builder rejects personal — to be probed) in **cn-hangzhou**: namespace, username, password → `ACR_REGISTRY`, `ACR_USERNAME`, `ACR_PASSWORD` in `.env`.
+2. One **ECS VM with Docker** (8 vCPU / 16 GiB, 200 GB disk, cn-hangzhou) for image mirroring, TB2 builds, running harbor itself and `asibench` (avoids the laptop's bandwidth).
+3. GPU instance for vLLM (see above).
 
 ## Cost estimate (Default QoS, mainland)
-- SWE-bench Pro: 51 tasks × ≤ 50 min × 1 vCPU/4 GiB × 4 models ≈ 10–20 元.
-- Terminal-Bench 2.0: 89 × 5 runs × 4 models = 1,780 task-runs × ~0.75 h avg × 4.4 元/h ≈ 5,900 元 (≈ $820); Economy QoS ≈ 4,300 元. The 3 h cap is the main risk; a per-run wall-clock budget is enforced by Harbor.
-- ASI-Bench: ECS VM time only, ≈ 100–200 元.
-- GPU serving: H20 ×2 ≈ 60–80 元/h × 60–100 h ≈ 4,000–8,000 元; spot/preemptible cuts this by half or more.
+- SWE-bench Pro: 51 × ≤50 min × 1 vCPU / 4 GiB × 4 models ≈ 10–20 元.
+- Terminal-Bench 2.0: 89 × 5 × 4 = 1,780 task-runs × ~0.75 h × 4.4 元/h ≈ 5,900 元 at 32 vCPU / 48 GiB (≈ 4,300 元 at Economy QoS; far less if the platform caps the spec lower).
+- ASI-Bench: ECS time ≈ 100–200 元. GPU serving: H20 × 2 ≈ 60–80 元/h × 60–100 h.
+
+## Fallback: ACS 容器版 + `harbor -e ack`
+Kubernetes API via kubeconfig, images built in-cluster (privileged DinD or BuildKit) and pushed to ACR, SandboxSet/SandboxClaim pools, per-task CPU/memory from task.toml. More setup (cluster, add-ons `acs-virtual-node ≥ 2.17.0`, `ack-agent-sandbox-controller ≥ 0.5.14`, RAM role), but real NetworkPolicy enforcement and no 极速版 spec limits. Use if the 极速版 spec cap or network isolation turns out unacceptable.
