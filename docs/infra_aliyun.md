@@ -61,3 +61,19 @@ Kubernetes API via kubeconfig, images built in-cluster (privileged DinD or Build
 - The templates API **accepts 32 vCPU / 48 GiB** at template creation (also 16/32 GiB, 8/16, 4/8, 1/4). Whether a sandbox actually boots at that spec is to be confirmed once an image builds.
 - Builds from **ACR personal edition fail** at the FC stage: `fc function create failed: 400 failed to optimization image due to: Image not stored in ACR is not supported yet`. The 极速版 docs require an **ACR Enterprise Edition** instance (same UID and region, VPC attached, not the Economy tier, image acceleration off). Personal-edition images are only reachable from ACS clusters (fallback route) or ECS.
 - Decision pending: (A) create an ACR EE 基础版 instance in Hangzhou and re-run the GitHub Actions mirror/build against it (`ACR_HOST`/`ACR_NAMESPACE` secrets), or (B) switch to ACS 容器版 + `harbor -e ack`, which pulls from any registry via a pull secret.
+
+## DECISION 2026-10-17: ACS 容器版 + `harbor -e ack` (no ACR EE)
+Harbor's `ack` backend only needs a Kubernetes API; plain ACS pods pull from ACR **personal** edition with a
+pull secret (or ACS 免密拉取 for same-account ACR). The Agent Sandbox add-on (SandboxSet pools) is optional
+and not required for Harbor. Images keep flowing via GitHub Actions into `qwen36-1017`.
+
+### Account owner checklist (all in 华东1 杭州)
+1. **VPC + vSwitch** (one AZ is enough) and a **NAT Gateway with an EIP** bound to the vSwitch: pods need public egress for the verifier phase (pip/npm, Go modules via `GOPROXY=https://goproxy.cn,direct`) and ACR pulls can use the ACR VPC endpoint.
+2. **ACS cluster** (容器计算服务, Kubernetes ≥ 1.30) in that VPC; enable the **public API endpoint** (we may have to reach it from outside the VPC) and download the **kubeconfig**. No GPU, no Agent Sandbox add-on needed. Leave the default `acs-virtual-node` add-on on.
+3. **ACR pull access**: either enable 免密拉取 (ACS → ACR personal, same account) or we create a `kubernetes.io/dockerconfigjson` secret from the ACR username/password (we can do this ourselves with kubectl once we have the kubeconfig).
+4. **ECS control/build box** in the same VPC: Ubuntu 22.04, 8 vCPU / 16 GiB, 200 GB ESSD, public EIP, SSH key login. Used for: running `harbor`, `asibench` (needs Docker), exporting the 3 adapters from Tinker (6.7 GB), merging, and anything bandwidth-heavy. Install Docker; we do the rest.
+5. **GPU instance** (later, when evaluation starts): 2 × 80 GB-class (H20 96 GB ×2 or A800 ×2) in the same VPC, Ubuntu + CUDA driver, ≥ 500 GB disk, for vLLM.
+6. (Optional) a RAM user AccessKey with ACS/ECS read permissions for the `aliyun` CLI; not required if kubeconfig + SSH are available.
+
+### Costs (reference)
+ACS pods are billed per second on vCPU/GiB (same order as Agent Sandbox: ≈ 0.07 元/vCPU·h, ≈ 0.04 元/GiB·h, general-purpose); cluster management fee for ACS is small (check purchase page). NAT Gateway ≈ 0.3–0.5 元/h + traffic. ECS 8c16g ≈ 1–1.5 元/h on demand. No ACR EE monthly fee.
