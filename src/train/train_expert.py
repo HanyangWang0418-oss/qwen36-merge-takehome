@@ -177,7 +177,8 @@ def main() -> int:
             batch = [train[j] for j in order[i : i + bs]]
             fb = client.forward_backward([to_datum(tinker, e) for e in batch], loss_fn="cross_entropy")
             lr = lr_at(step)
-            opt = client.optim_step(types.AdamParams(learning_rate=lr, grad_clip=cfg["optim"]["grad_clip"]))
+            opt = client.optim_step(types.AdamParams(learning_rate=lr, grad_clip_norm=cfg["optim"]["grad_clip"],
+                                                     weight_decay=cfg["optim"].get("weight_decay", 0.0)))
             loss = mean_loss(fb.result(), batch)
             opt.result()
             tokens_cum += sum(len(e["tokens"]) for e in batch)
