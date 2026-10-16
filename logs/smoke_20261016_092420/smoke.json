@@ -1,0 +1,34 @@
+{
+  "base": "Qwen/Qwen3.6-35B-A3B",
+  "hf_revision": "995ad96eacd98c81ed38be0c5b274b04031597b0",
+  "started_at": "2026-10-16T09:24:20.404466+00:00",
+  "n_supported_models": 39,
+  "qwen36_models": [
+    "Qwen/Qwen3.6-27B",
+    "Qwen/Qwen3.6-35B-A3B",
+    "Qwen/Qwen3.6-35B-A3B:peft:262144",
+    "Qwen/Qwen3.6-35B-A3B:peft:262144:inference-fast"
+  ],
+  "toy_tokens": [
+    60,
+    61,
+    54,
+    42
+  ],
+  "toy_loss_tokens": [
+    39,
+    43,
+    31,
+    22
+  ],
+  "create_client_s": 6.5,
+  "losses": [
+    0.9744602236072902,
+    0.5848959831419104,
+    0.26816230507060823
+  ],
+  "sampler_checkpoint": "tinker://aa2288a3-8d30-5caf-838b-cdc30f700350:train:0/sampler_weights/smoke_smoke_20261016_092420",
+  "state_checkpoint": "tinker://aa2288a3-8d30-5caf-838b-cdc30f700350:train:0/weights/smoke_smoke_20261016_092420",
+  "sample": "Here's a thinking process:\n\n1.  **Understand User Request:** The user wants to \"List files sorted by size, largest first.\"\n2.  **Identify Key Requirements:**\n   - List files\n   - Sort by size\n   - Largest first (descending order)\n   - No specific OS/command-line tool mentioned, but this is a classic command-line task.\n3.  **Determine Context/Environment:** Since it's a general request without specifying an OS, I should provide solutions for common operating systems (Linux/macOS via bash, Windows via CMD/PowerShell). I'll focus on the most common and robust ones.\n4.  **Linux/macOS (Bash):**\n   - Command: `ls -lhS` or `ls -lS`\n   - Explanation: `-l` for long format, `-h` for human-readable sizes, `-S` sorts by file size descending.\n   - Alternative: `",
+  "finished_at": "2026-10-16T09:25:35.753306+00:00"
+}

@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.data.common import (ContaminationFilter, NearDedup, difficulty_tier, exact_key,  # noqa: E402
                              example_text, shingles, split_train_dev, write_jsonl, write_manifest)
-from src.data.loaders import LOADERS, iter_source  # noqa: E402
+from src.data.loaders import LOADERS, fetched_pages, iter_source  # noqa: E402
 
 TIER_CUTS = {"n_turns": (10, 30), "response_tokens": (2000, 8000)}
 
@@ -43,6 +43,13 @@ def load_blocklists(c: dict) -> ContaminationFilter:
 
     m = manifest("exclude_repos_from")
     repos |= set(m.get("repos", []))
+    # SWE-bench Pro ids look like "instance_<owner>__<repo>-<sha>-v<sha>"; derive owner/repo
+    # from them too, because the locked `repos` list keeps the "instance_" prefix.
+    for tid in m.get("task_ids", []):
+        head = tid[len("instance_"):] if tid.startswith("instance_") else tid
+        head = head.split("-", 1)[0]
+        if "__" in head:
+            repos.add(head.replace("__", "/", 1))
     m = manifest("exclude_instance_ids_from")
     ids |= set(m.get("task_ids", []))
     m = manifest("exclude_task_names_from")
@@ -82,6 +89,9 @@ def main() -> int:
             ex = loader(row)
             if ex is None:
                 st["unparsable"] += 1
+                continue
+            if ex == "unresolved":  # source-level quality/licence rule (see loader docstring)
+                st["unresolved_or_excluded"] += 1
                 continue
             ex["meta"]["source"] = src["name"]
             if not filt.keep(ex):
@@ -125,7 +135,15 @@ def main() -> int:
     tiers = Counter(e["meta"]["tier"] for e in train)
     manifest = write_manifest(args.expert, {
         "expert": args.expert,
-        "sources": [{k: src.get(k) for k in ("name", "hf_repo", "local_file", "split", "license", "url", "weight")} | {"stats": dict(stats[src["name"]])} for src in cfg["sources"]],
+        "sources": [{k: src.get(k) for k in ("name", "hf_repo", "local_file", "split", "license", "url", "weight", "fetch")}
+                    | {"loader": src["loader"], "loader_rule": (LOADERS[src["loader"]].__doc__ or "").strip(),
+                       "fetched_pages": fetched_pages(src) if src.get("hf_repo") else [],
+                       "status": ("skipped: file missing" if src.get("local_file") and not (ROOT / src["local_file"]).exists()
+                                  else "skipped: hf_repo not locked" if src.get("hf_repo", "x") == "LOCK"
+                                  else "skipped: no rows fetched" if src.get("hf_repo") and not fetched_pages(src)
+                                  else "used"),
+                       "stats": dict(stats[src["name"]])} for src in cfg["sources"]],
+        "ingestion": "stratified row sample via datasets-server rows API (src/data/fetch_rows.py); shard files were not downloadable at this site's bandwidth",
         "contamination_blocklist": {"repos": len(filt.repos), "instance_ids": len(filt.ids), "task_names": len(filt.task_names),
                                     "benchmark_shingles": len(filt.bench_shingles), "canary": bool(filt.canary)},
         "contamination_drops_by_reason": dict(filt.reasons),

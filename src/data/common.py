@@ -78,6 +78,10 @@ class ContaminationFilter:
             return "repo"
         if str(meta.get("instance_id", "")).lower() in self.ids:
             return "instance_id"
+        tn = str(meta.get("task_name", "")).lower()
+        # TB task variants are named "<task>.easy" / "<task>.hard"; the base name is what the TB2 list holds
+        if tn and (tn in self.task_names or tn.split(".")[0] in self.task_names):
+            return "task_name"
         text = example_text(ex)
         low = text.lower()
         if any(t in low for t in self.task_names if len(t) > 6):
