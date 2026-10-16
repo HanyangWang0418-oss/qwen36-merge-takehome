@@ -1,0 +1,10 @@
+# Merge recipe: ta_l0.5
+method: task_arithmetic
+density: 1.0            # ties: fraction of entries kept per expert; dare: keep prob
+out_rank: 96              # ties/dare only: SVD re-compression rank (= 3 x 32, matches task-arithmetic rank)
+seed: 0
+output_dir: models/weights/merged_ta_l0.5
+experts:
+  - {path: models/weights/e1_code_repair,    lambda: 0.5, layers: null}
+  - {path: models/weights/e2_terminal_agent, lambda: 0.5, layers: null}
+  - {path: models/weights/e3_reasoning,      lambda: 0.5, layers: null}

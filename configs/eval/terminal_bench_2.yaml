@@ -1,0 +1,45 @@
+# Terminal-Bench 2.0 — locked evaluation config
+benchmark: terminal_bench_2
+primary_metric: success_rate_mean_5runs  # mean over 5 seeded runs; also report std
+secondary_metrics: [success_rate_std, per_run_success_rate, env_failure_rate, timeout_rate, mean_wallclock_s, mean_tokens]
+
+dataset:
+  harbor_registry: terminal-bench/terminal-bench
+  version: LOCK                          # exact 2.0.x tag, never @latest
+  n_tasks: LOCK                          # fill from snapshot
+  task_list_file: data/manifests/terminal_bench_2_tasks.json
+
+harness:
+  repo: https://github.com/harbor-framework/terminal-bench
+  commit: LOCK
+  runner: harbor
+  harbor_version: LOCK
+  sandbox_env: modal
+
+agent:
+  name: terminus-2
+  terminus_version: LOCK
+  model_endpoint: openai_compatible
+
+# Aligned with the Qwen3.6-35B-A3B model card setting as the task statement requires.
+resources:
+  per_task_timeout_s: 10800              # 3 h
+  cpus: 32
+  memory_gb: 48
+
+inference:
+  thinking: true
+  preserve_thinking: true
+  dtype: bf16
+  quantization: none
+  temperature: 1.0
+  top_p: 0.95
+  top_k: 20
+  max_tokens: 81920
+  context_window: 262144
+
+runs:
+  n_runs: 5
+  seeds: [1, 2, 3, 4, 5]                 # identical for every model
+
+env_failure_policy: "Same rule as SWE-bench Pro: one retry, then counted as failure and listed separately. Per-run and per-seed failure lists are kept."

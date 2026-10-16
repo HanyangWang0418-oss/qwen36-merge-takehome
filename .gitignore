@@ -1,0 +1,23 @@
+# weights never go to GitHub
+*.safetensors
+*.bin
+*.pt
+*.gguf
+models/weights/
+checkpoints/
+# env
+.venv/
+__pycache__/
+*.pyc
+.env
+# raw data (manifests are kept, raw dumps are not)
+data/raw/
+data/processed/*.jsonl
+# large logs are compressed before commit
+logs/**/*.log
+!logs/**/*.log.gz
+# eval scratch
+jobs/
+hf_instances_*/
+out_seed*/
+.pytest_cache/

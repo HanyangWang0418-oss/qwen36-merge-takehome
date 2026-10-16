@@ -1,0 +1,52 @@
+# ASI-Bench — locked evaluation config
+benchmark: asi_bench
+# DECISION (fixed before training): primary metric = mean final_score over all valid
+# B3-level evaluations (60 projects). B1/B2/B4 means and the all-level mean are
+# reported as secondary metrics. Invalid evaluations are listed separately and
+# count as 0 in a sensitivity row, excluded in the official-style row.
+primary_metric: b3_mean_final_score
+secondary_metrics: [b1_mean, b2_mean, b4_mean, all_levels_mean, n_invalid, env_failure_rate, mean_wallclock_s]
+
+dataset:
+  official_track_repo: Apexintelligence-AI/ASI-Bench-seed42      # private references, website scoring
+  local_track_repo: Apexintelligence-AI/ASI-Bench-seed31415      # public references, local scoring
+  track_used: LOCK                        # seed42 if interviewer confirms multi-submission; else seed31415 (disclosed)
+  hf_revision: LOCK
+  n_projects: 60
+  levels: [B1, B2, B3, B4]
+  n_evaluations: 240
+  task_list_file: data/manifests/asi_bench_tasks.json
+
+harness:
+  repo: https://github.com/apexin-ai/ASI-Bench
+  commit: LOCK
+  cli: asibench
+  cli_version: "0.2.0"
+  sandbox: os                             # docker; linux_ns also acceptable for local track
+  python: ">=3.11"
+
+agent:
+  name: opencode
+  agent_config:
+    api_protocol: openai
+    api_base: "<our vLLM endpoint>"
+    supports_image_input: false
+  step_budget: LOCK
+  per_task_timeout_s: LOCK
+
+judge:
+  provider: LOCK                           # ASIBENCH_JUDGE_* ; must be identical for all models
+  model: LOCK
+
+inference:
+  thinking: true
+  preserve_thinking: true
+  dtype: bf16
+  quantization: none
+  temperature: 1.0
+  top_p: 0.95
+  top_k: 20
+  max_tokens: 32768
+  context_window: 131072
+
+env_failure_policy: "Evaluations the scorer marks NOT SCORED are listed in env_failures.json; the official-style aggregate excludes them, the sensitivity aggregate counts them as 0. Both are reported."

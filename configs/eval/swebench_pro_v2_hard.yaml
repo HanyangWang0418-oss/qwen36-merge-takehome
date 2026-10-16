@@ -1,0 +1,53 @@
+# SWE-bench Pro v2 HARD-51 — locked evaluation config
+# Every field marked LOCK must be filled before any expert training starts
+# and must not change afterwards. scripts/lock_benchmarks.py writes the
+# snapshot into data/manifests/swebench_pro_v2_hard.json.
+benchmark: swebench_pro_v2_hard
+primary_metric: resolved_rate            # resolved / 51, from fresh-sandbox regrade
+secondary_metrics: [resolved_rate_original_sandbox, env_failure_rate, timeout_rate, mean_wallclock_s, mean_tokens]
+
+dataset:
+  hf_repo: ScaleAI/SWE-bench_Pro
+  hf_config: hard
+  split: test
+  hf_revision: LOCK                      # dataset commit sha
+  n_tasks: 51
+  task_id_source: https://github.com/scaleapi/SWE-bench_Pro-os/blob/main/v2/hard51_ids.txt
+  hard_split_basis: "51 of 642 V2 tasks that Scale found hardest across models (Scale blog, 2026-09-22)"
+
+harness:
+  repo: https://github.com/scaleapi/SWE-bench_Pro-os
+  commit: LOCK
+  runner: harbor
+  harbor_version: ">=0.22"               # pin exact version in requirements.lock
+  task_dir: v2/tasks
+  container_image_pattern: "ghcr.io/scaleapi/swe-bench_pro-v2:<instance_id>"
+  sandbox_env: modal                     # official leaderboard env; docker is allowed but must be declared
+
+agent:
+  name: locked_mini_swe:LockedMiniSwe   # self-hosted models use the mini-swe-agent locked agent
+  config_file: v2/tooling/configs/mini_toolcall.yaml
+  mini_swe_agent_version: LOCK
+  model_endpoint: openai_compatible      # OPENAI_API_BASE -> our vLLM server
+  network: no-network                    # agent sandbox offline; only model host allowed
+  disallowed_tools: [WebFetch, WebSearch]
+  max_steps: LOCK                        # from mini_toolcall.yaml, record the value
+  per_task_timeout_s: 3000               # 50 min, enforced in-sandbox; partial patch still graded
+  token_budget: LOCK                     # record the step/token cap from config
+
+grading:
+  method: patch_replay                   # patch_replay:PatchReplayAgent on pristine image
+  report_both: true                      # original-sandbox and regraded numbers; regrade is authoritative
+
+inference:
+  thinking: true
+  preserve_thinking: true
+  dtype: bf16
+  quantization: none
+  temperature: 0.6                       # Qwen model-card "precise coding" setting; same for all models
+  top_p: 0.95
+  top_k: 20
+  max_tokens: 32768
+  context_window: 131072
+
+env_failure_policy: "Tasks that fail for infrastructure reasons (image pull, sandbox crash) are re-run once; if still failing they count as unresolved and are listed separately in results/<model>/swebench_pro_v2_hard/env_failures.json. They are never removed from the denominator."

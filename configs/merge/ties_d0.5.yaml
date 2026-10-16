@@ -1,0 +1,10 @@
+# Merge recipe: ties_d0.5
+method: ties
+density: 0.5            # ties: fraction of entries kept per expert; dare: keep prob
+out_rank: 96              # ties/dare only: SVD re-compression rank (= 3 x 32, matches task-arithmetic rank)
+seed: 0
+output_dir: models/weights/merged_ties_d0.5
+experts:
+  - {path: models/weights/e1_code_repair,    lambda: 1.0, layers: null}
+  - {path: models/weights/e2_terminal_agent, lambda: 1.0, layers: null}
+  - {path: models/weights/e3_reasoning,      lambda: 1.0, layers: null}
