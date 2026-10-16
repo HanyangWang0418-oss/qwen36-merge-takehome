@@ -32,10 +32,38 @@ def assistant_spans(text: str) -> list[tuple[int, int]]:
     return spans
 
 
+def normalize_tool_calls(messages: list[dict]) -> list[dict]:
+    """Qwen templates iterate `tool_call.function.arguments | items`, so arguments must be a
+    mapping. OpenAI-style data stores them as a JSON string; coerce (and leave unparsable strings
+    wrapped as {"_raw": str})."""
+    import json
+
+    out = []
+    for m in messages:
+        if m.get("tool_calls"):
+            m = dict(m)
+            fixed = []
+            for tc in m["tool_calls"]:
+                tc = dict(tc)
+                fn = dict(tc.get("function", {}))
+                args = fn.get("arguments")
+                if isinstance(args, str):
+                    try:
+                        fn["arguments"] = json.loads(args) if args.strip() else {}
+                    except json.JSONDecodeError:
+                        fn["arguments"] = {"_raw": args}
+                tc["function"] = fn
+                fixed.append(tc)
+            m["tool_calls"] = fixed
+        out.append(m)
+    return out
+
+
 def render_example(tokenizer, messages: list[dict], assistant_only: bool = True,
                    template_kwargs: dict | None = None) -> tuple[list[int], list[float]]:
     """Returns (token_ids, weights). weights[i] == 1.0 where token i lies inside an assistant turn."""
     kw = {"preserve_thinking": True, **(template_kwargs or {})}
+    messages = normalize_tool_calls(messages)
     full = tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False, **kw)
     spans = assistant_spans(full)
     n_assistant = sum(1 for m in messages if m["role"] == "assistant")
