@@ -213,9 +213,23 @@ def main() -> int:
         if mi % 100 == 0:
             print(f"{mi}/{len(modules)} {m.split('.model.')[-1]} 3d={is3d} rank={r_out} err={err:.4f}", flush=True)
 
+    r = max(ranks_out)
     if len(ranks_out) != 1:
-        raise RuntimeError(f"PEFT needs one rank per adapter, got {sorted(ranks_out)}")
-    r = ranks_out.pop()
+        # Layer-scoped experts leave some modules at a lower concatenated rank; zero-pad A (extra rows)
+        # and B (extra columns) to the global rank. Zero pairs contribute nothing to B@A.
+        padded = 0
+        for k in list(tensors):
+            if not k.endswith(".lora_A.weight"):
+                continue
+            kb = k[: -len(".lora_A.weight")] + ".lora_B.weight"
+            A, B = tensors[k], tensors[kb]
+            if A.dim() == 2 and A.shape[0] < r:
+                tensors[k] = torch.cat([A, A.new_zeros(r - A.shape[0], A.shape[1])], 0)
+                tensors[kb] = torch.cat([B, B.new_zeros(B.shape[0], r - B.shape[1])], 1); padded += 1
+            elif A.dim() == 3 and A.shape[1] < r:
+                tensors[k] = torch.cat([A, A.new_zeros(A.shape[0], r - A.shape[1], A.shape[2])], 1)
+                tensors[kb] = torch.cat([B, B.new_zeros(B.shape[0], B.shape[1], r - B.shape[2])], 2); padded += 1
+        print(f"zero-padded {padded} modules from ranks {sorted(ranks_out)} to {r}")
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
