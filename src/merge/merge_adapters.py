@@ -117,6 +117,45 @@ def svd_lowrank(d: torch.Tensor, rank: int) -> tuple[torch.Tensor, torch.Tensor,
     return a.contiguous(), b.contiguous(), err
 
 
+def lowrank_tall_from_chunks(chunks, n_cols: int, rank: int) -> tuple[torch.Tensor, torch.Tensor, float]:
+    """Best rank-r factorisation (A [r, n], B [m, r], B@A ≈ M) of a tall matrix M [m, n] given as an
+    iterable of row-chunks, without materialising M: eigendecompose G = MᵀM (n×n, fp64), then B = M V_r.
+    Equivalent to truncated SVD (V from eigenvectors, singular values = sqrt(eigs)). Memory ~ one chunk + n².
+    `chunks` must be a zero-arg callable returning a fresh iterator (it is consumed twice)."""
+    G = torch.zeros(n_cols, n_cols, dtype=torch.float64)
+    fro2 = 0.0
+    for c in chunks():
+        c64 = c.reshape(-1, n_cols).to(torch.float64)
+        G += c64.T @ c64
+        fro2 += float((c64 * c64).sum())
+    evals, evecs = torch.linalg.eigh(G)                  # ascending
+    idx = torch.argsort(evals, descending=True)[:rank]
+    V = evecs[:, idx]                                     # [n, r]
+    captured = float(evals[idx].clamp(min=0).sum())
+    err = ((max(fro2 - captured, 0.0)) ** 0.5) / (fro2 ** 0.5 + 1e-12)
+    Vf = V.to(torch.float32)
+    B = torch.cat([c.reshape(-1, n_cols).float() @ Vf for c in chunks()], 0)   # [m, r]
+    return Vf.T.contiguous(), B.contiguous(), err
+
+
+def lowrank_wide_from_chunks(chunks, n_rows: int, rank: int) -> tuple[torch.Tensor, torch.Tensor, float]:
+    """Mirror of lowrank_tall_from_chunks for a wide matrix M [m, n] given as column-chunks [m, k]:
+    eigendecompose MMᵀ (m×m), B = U_r S_r (shared), A = U_rᵀ M (per column chunk)."""
+    G = torch.zeros(n_rows, n_rows, dtype=torch.float64)
+    fro2 = 0.0
+    for c in chunks():
+        c64 = c.reshape(n_rows, -1).to(torch.float64)
+        G += c64 @ c64.T
+        fro2 += float((c64 * c64).sum())
+    evals, evecs = torch.linalg.eigh(G)
+    idx = torch.argsort(evals, descending=True)[:rank]
+    U = evecs[:, idx].to(torch.float32)                   # [m, r]
+    captured = float(evals[idx].clamp(min=0).sum())
+    err = ((max(fro2 - captured, 0.0)) ** 0.5) / (fro2 ** 0.5 + 1e-12)
+    A = torch.cat([U.T @ c.reshape(n_rows, -1).float() for c in chunks()], 1)  # [r, n]  (= S Vᵀ)
+    return A.contiguous(), U.contiguous(), err
+
+
 def expert_delta(a: torch.Tensor, b: torch.Tensor, e: int, scale: float) -> torch.Tensor:
     """Dense delta of expert e for a 3D module with broadcast on either side."""
     ae = a[e if a.shape[0] > 1 else 0].float()
@@ -177,44 +216,53 @@ def main() -> int:
         else:
             lams = [a.lam for a in contrib]
             if is3d:
-                # Merge every expert's dense delta, then take ONE joint low-rank factorisation that keeps the
-                # exported layout (shared A for w1/w3, shared B for w2): the best rank-r approximation of the
-                # experts stacked along the non-shared side. Memory ~ E*out*in*4 bytes per module (~1 GB).
+                # Merge every expert's dense delta, then ONE joint low-rank factorisation that keeps the exported
+                # layout (shared A for w1/w3 -> tall stack over experts; shared B for w2 -> wide stack). Computed
+                # from expert chunks via the Gram matrix, so memory stays ~ chunk size + 2048².
                 E = max(a0.shape[0], b0.shape[0])
                 shared_A = a0.shape[0] == 1
                 abs_ = [a.ab(m) for a in contrib]
-                D_all = []
-                for e in range(E):
-                    deltas = [expert_delta(A_, B_, e, a.scale) for (A_, B_), a in zip(abs_, contrib)]
-                    if method.startswith("dare"):
-                        deltas = [dare(d, density, gen) for d in deltas]
-                    D = ties(deltas, lams, density if method == "ties" else 1.0) if method in ("ties", "dare_ties") else sum(l * d for l, d in zip(lams, deltas))
-                    D_all.append(D)
-                D_all = torch.stack(D_all)                      # [E, out, in]
-                out_dim, in_dim = D_all.shape[1], D_all.shape[2]
+                CH = int(cfg.get("expert_chunk", 32))
+
+                def merged_chunks():
+                    for e0 in range(0, E, CH):
+                        Ds = []
+                        for e in range(e0, min(E, e0 + CH)):
+                            deltas = [expert_delta(A_, B_, e, a.scale) for (A_, B_), a in zip(abs_, contrib)]
+                            if method.startswith("dare"):
+                                deltas = [dare(d, density, gen) for d in deltas]
+                            Ds.append(ties(deltas, lams, density if method == "ties" else 1.0) if method in ("ties", "dare_ties") else sum(l * d for l, d in zip(lams, deltas)))
+                        yield torch.stack(Ds)                 # [ch, out, in]
+
+                out_dim = b0.shape[1]
+                in_dim = a0.shape[2]
                 if shared_A:
-                    Mx = D_all.reshape(E * out_dim, in_dim)     # rows: experts x out
-                    A2, B2, err = svd_lowrank(Mx, out_rank)     # A2 [r,in], B2 [E*out, r]
-                    A_m = A2.unsqueeze(0)                        # [1, r, in]
-                    B_m = B2.reshape(E, out_dim, -1)             # [E, out, r]
+                    A2, B2, err = lowrank_tall_from_chunks(merged_chunks, in_dim, out_rank)   # A2 [r,in], B2 [E*out, r]
+                    A_m = A2.unsqueeze(0)
+                    B_m = B2.reshape(E, out_dim, -1)
                 else:
-                    Mx = D_all.permute(1, 0, 2).reshape(out_dim, E * in_dim)  # cols: experts x in
-                    A2, B2, err = svd_lowrank(Mx, out_rank)     # A2 [r, E*in], B2 [out, r]
-                    A_m = A2.reshape(-1, E, in_dim).permute(1, 0, 2).contiguous()  # [E, r, in]
-                    B_m = B2.unsqueeze(0)                        # [1, out, r]
+                    A2, B2, err = lowrank_wide_from_chunks(lambda: (c.permute(1, 0, 2) for c in merged_chunks()), out_dim, out_rank)  # A2 [r, E*in], B2 [out, r]
+                    A_m = A2.reshape(-1, E, in_dim).permute(1, 0, 2).contiguous()
+                    B_m = B2.unsqueeze(0)
                 r_out = A_m.shape[1]
-                del D_all, Mx
             else:
-                deltas = [a.scale * (a.ab(m)[1].float() @ a.ab(m)[0].float()) for a in contrib]
-                if method.startswith("dare"):
-                    deltas = [dare(d, density, gen) for d in deltas]
-                if method in ("ties", "dare_ties"):
-                    D = ties(deltas, lams, density if method == "ties" else 1.0)
-                elif method == "dare_ta":
-                    D = sum(l * d for l, d in zip(lams, deltas))
-                else:
-                    raise ValueError(method)
-                A_m, B_m, err = svd_lowrank(D, out_rank)
+                abs_ = [a.ab(m) for a in contrib]
+                out_dim, in_dim = b0.shape[0], a0.shape[1]
+                RC = int(cfg.get("row_chunk", 16384))
+
+                def merged_rows():
+                    for r0 in range(0, out_dim, RC):
+                        deltas = [a.scale * (B_[r0:r0 + RC].float() @ A_.float()) for (A_, B_), a in zip(abs_, contrib)]
+                        if method.startswith("dare"):
+                            deltas = [dare(d, density, gen) for d in deltas]
+                        if method in ("ties", "dare_ties"):
+                            yield ties(deltas, lams, density if method == "ties" else 1.0)
+                        elif method == "dare_ta":
+                            yield sum(l * d for l, d in zip(lams, deltas))
+                        else:
+                            raise ValueError(method)
+
+                A_m, B_m, err = lowrank_tall_from_chunks(merged_rows, in_dim, out_rank)
                 r_out = out_rank
         n3d += int(is3d)
         # scaling folded into B: alpha == r so PEFT scaling is 1.0
@@ -224,7 +272,7 @@ def main() -> int:
         errors[m] = err
         lm = LAYER_RE.search(m)
         per_layer_err[lm.group(1) if lm else "other"].append(err)
-        if mi % 100 == 0:
+        if mi % 50 == 0 or is3d:
             print(f"{mi}/{len(modules)} {m.split('.model.')[-1]} 3d={is3d} rank={r_out} err={err:.4f}", flush=True)
 
     r = max(ranks_out)

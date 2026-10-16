@@ -111,3 +111,16 @@ def test_ties_sign_election(tmp_path):
     d1, dm = dense(a1), dense(out)
     for m in MODULES:  # 1.0*d vs -0.5*d: sign of d wins, mean over agreeing = d
         assert torch.allclose(dm[m], d1[m], atol=1e-3, rtol=1e-3)
+
+
+def test_gram_factorisation_matches_svd():
+    from src.merge.merge_adapters import lowrank_tall_from_chunks, lowrank_wide_from_chunks, svd_lowrank
+    g = torch.Generator().manual_seed(7)
+    M = (torch.randn(300, 6, generator=g) @ torch.randn(6, 40, generator=g)) + 0.01 * torch.randn(300, 40, generator=g)
+    A1, B1, e1 = svd_lowrank(M, 6)
+    A2, B2, e2 = lowrank_tall_from_chunks(lambda: (M[i:i + 64] for i in range(0, 300, 64)), 40, 6)
+    assert torch.allclose(B2 @ A2, B1 @ A1, atol=1e-3) and abs(e1 - e2) < 1e-3
+    W = M.T  # wide 40 x 300
+    A3, B3, e3 = lowrank_wide_from_chunks(lambda: (W[:, i:i + 64] for i in range(0, 300, 64)), 40, 6)
+    A4, B4, e4 = svd_lowrank(W, 6)
+    assert torch.allclose(B3 @ A3, B4 @ A4, atol=1e-3) and abs(e3 - e4) < 1e-3
