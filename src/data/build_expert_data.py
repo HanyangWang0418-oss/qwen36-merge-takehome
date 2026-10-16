@@ -148,7 +148,7 @@ def main() -> int:
                                     "benchmark_shingles": len(filt.bench_shingles), "canary": bool(filt.canary)},
         "contamination_drops_by_reason": dict(filt.reasons),
         "n_train": n_tr, "n_dev": n_dev, "difficulty_tiers_train": dict(tiers),
-        "dedup": "sha1 exact on normalised text, then 64-perm minhash LSH (16 bands x 4 rows, 5-gram shingles)",
+        "dedup": "on assistant-turn text only (dedup_text): sha1 exact on normalised text, then 64-perm minhash LSH (8 bands x 8 rows, 5-gram shingles, threshold ~0.77 Jaccard)",
         "seed": args.seed, "limit": args.limit,
     })
     print(f"train={n_tr} dev={n_dev} tiers={dict(tiers)} manifest={manifest.relative_to(ROOT)}")

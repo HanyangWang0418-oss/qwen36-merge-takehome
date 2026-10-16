@@ -80,6 +80,8 @@ def plan_pages(src: dict, n_total: int) -> list:
     n_pages = max(1, -(-n_rows // page))
     starts = list(range(0, max(1, n_total - page + 1), page))
     random.Random(int(f.get("seed", 0))).shuffle(starts)
+    if n_total % page and n_total > page:  # trailing partial page last, so the shuffled prefix is stable
+        starts.append(n_total - n_total % page)
     return [(off, min(page, n_total - off)) for off in starts[:n_pages]]
 
 

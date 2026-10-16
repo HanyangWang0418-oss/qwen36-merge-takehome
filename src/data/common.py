@@ -24,8 +24,22 @@ def example_text(ex: dict) -> str:
     return "\n".join(m["content"] for m in ex["messages"] if isinstance(m.get("content"), str))
 
 
+def dedup_text(ex: dict) -> str:
+    """Text the dedup stages look at: the assistant turns only (content and
+    tool-call arguments), i.e. what the loss is computed on. Prompts are excluded
+    because agent and dialogue sources share multi-kB instructions/system prompts
+    and long boilerplate observations that make unrelated examples look similar."""
+    parts = []
+    for m in ex["messages"]:
+        if m["role"] == "assistant":
+            parts.append(m.get("content") or "")
+            for tc in m.get("tool_calls") or []:
+                parts.append(json.dumps(tc.get("function", {}).get("arguments", ""), sort_keys=True, ensure_ascii=False))
+    return "\n".join(parts)
+
+
 def exact_key(ex: dict) -> str:
-    return hashlib.sha1(normalize(example_text(ex)).encode()).hexdigest()
+    return hashlib.sha1(normalize(dedup_text(ex)).encode()).hexdigest()
 
 
 def shingles(text: str, n: int = 13) -> set[int]:
@@ -42,14 +56,16 @@ def minhash_sig(sh: set[int], k: int = 64, seed: int = 0) -> tuple[int, ...]:
 
 
 class NearDedup:
-    """Band-LSH over 64-perm minhash; near-duplicates (est. Jaccard >= ~0.8) dropped."""
+    """Band-LSH over 64-perm minhash of 5-gram shingles of dedup_text().
+    8 bands x 8 rows puts the detection threshold at (1/8)^(1/8) ~= 0.77 Jaccard
+    (16 x 4 would have fired at ~0.5 and dropped distinct runs on the same issue)."""
 
-    def __init__(self, bands: int = 16, rows: int = 4):
+    def __init__(self, bands: int = 8, rows: int = 8):
         self.bands, self.rows = bands, rows
         self.seen: set[tuple[int, int]] = set()
 
     def is_dup(self, ex: dict) -> bool:
-        sig = minhash_sig(shingles(example_text(ex), n=5))
+        sig = minhash_sig(shingles(dedup_text(ex), n=5))
         keys = [(b, hash(sig[b * self.rows : (b + 1) * self.rows])) for b in range(self.bands)]
         dup = any(k in self.seen for k in keys)
         self.seen.update(keys)

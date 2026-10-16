@@ -4,7 +4,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-import torch
+import pytest
+
+torch = pytest.importorskip("torch")  # merge path only; install with `uv sync --extra merge`
 import yaml
 from safetensors.torch import load_file, save_file
 

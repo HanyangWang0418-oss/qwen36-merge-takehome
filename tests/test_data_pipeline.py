@@ -23,8 +23,7 @@ def check_example(ex):
     for m in ex["messages"]:
         assert m["role"] in ROLES and isinstance(m["content"], str)
         for tc in m.get("tool_calls", []):
-            assert tc["type"] == "function" and isinstance(tc["function"]["arguments"], str)
-            json.loads(tc["function"]["arguments"])
+            assert tc["type"] == "function" and isinstance(tc["function"]["arguments"], dict)  # dict, for the Qwen template
         if m["role"] == "tool":
             assert "tool_call_id" in m
     assert ex["meta"]["n_turns"] == sum(1 for m in ex["messages"] if m["role"] == "assistant")
@@ -87,6 +86,7 @@ def test_openhands_trajectory_loader():
         assert ex["tools"] == r["tools"]
         assistant_tcs = [m for m in ex["messages"] if m.get("tool_calls")]
         assert assistant_tcs and assistant_tcs[0]["tool_calls"][0]["function"]["name"]
+        assert "command" in assistant_tcs[0]["tool_calls"][0]["function"]["arguments"]  # JSON string from the source parsed to a dict
         # null content from the source becomes "" and null-field padding (function_call, name) is dropped
         assert all("function_call" not in m for m in ex["messages"])
 
@@ -135,6 +135,10 @@ def test_terminus_trajectory_loader(fixture):
         pytest.skip("fixture not captured yet")
     for r in rows(fixture):
         ex = LOADERS["terminus_trajectory"](r)
+        last = r["conversations"][-1]["content"]
+        if not ('"task_complete": true' in last or '"is_task_complete": true' in last):
+            assert ex == "unresolved"  # episode ended without declaring completion (step cap)
+            continue
         check_example(ex)
         assert all("tool_calls" not in m for m in ex["messages"])  # plain-text agent, no native tool calls
         expected = r["task"] or r["trial_name"].split("__")[0]
@@ -152,6 +156,14 @@ def test_contamination_task_name_and_repo_variants():
     assert filt.reason(mk({"repo": "other/repo"})) is None
 
 
+def test_terminus_completion_rule():
+    base = {"task": "x", "trial_name": "x.1", "episode": "episode-1"}
+    done = {**base, "conversations": [{"role": "user", "content": "do"}, {"role": "assistant", "content": '{"is_task_complete": true}'}]}
+    capped = {**base, "conversations": [{"role": "user", "content": "do"}, {"role": "assistant", "content": '{"task_complete": false}'}]}
+    assert isinstance(LOADERS["terminus_trajectory"](done), dict)
+    assert LOADERS["terminus_trajectory"](capped) == "unresolved"
+
+
 def test_collapse_prefixes_keeps_longest_per_trial():
     mk = lambda trial, n: {"task": "t", "trial_name": trial, "episode": f"episode-{n}", "conversations": [{"role": "user", "content": "x"}] * n}
     rows = [mk("a", 2), mk("a", 6), mk("a", 4), mk("b", 2)]
@@ -167,3 +179,12 @@ def test_openhands_sft_trajectory_loader():
         check_example(ex)
         assert "/" in ex["meta"]["repo"], ex["meta"]  # parsed from the /workspace/<owner>__<repo>__<ver> path
         assert all("tool_calls" not in m for m in ex["messages"])
+
+
+@pytest.mark.skipif(not (FIXTURES / "tmax_trajectory.jsonl").exists(), reason="fixture not captured yet")
+def test_tmax_trajectory_loader():
+    for r in rows("tmax_trajectory"):
+        ex = LOADERS["tmax_trajectory"](r)
+        check_example(ex)
+        assert ex["meta"]["task_name"] == r["task_group_id"] and r["trajectory_id"].startswith(r["task_group_id"])
+        assert ex["messages"][0]["role"] == "system"

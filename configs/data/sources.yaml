@@ -37,7 +37,7 @@ e1_code_repair:
       license: CC-BY-4.0
       url: https://huggingface.co/datasets/nvidia/Nemotron-SWE-v1
       weight: 0.2
-      fetch: {config: default, split: r2e_gym, n_rows: 150, page: 2, priority: 7}
+      fetch: {config: default, split: r2e_gym, n_rows: 600, page: 2, priority: 7}
   difficulty_field: n_turns          # tiers: easy <10 turns, medium 10-30, hard >30
   contamination:
     exclude_repos_from: data/manifests/swebench_pro_v2_hard.json   # all 11 SWE-bench Pro repos, every task
@@ -64,6 +64,14 @@ e2_terminal_agent:
       url: https://huggingface.co/datasets/mlfoundations-dev/swesmith_with_plain_docker-sandboxes-traces-terminus-2
       weight: 0.25
       keep_longest_by: [trial_name]
+      fetch: {config: default, split: train, n_rows: 3000, page: 50, priority: 6}
+    - name: tmax-agent-terminus
+      hf_repo: NiuNiu0110/TMax-Agent-SFT-terminus   # 5445 Qwen3.6-27B terminal trajectories on synthetic sysadmin/coding tasks, several solutions per task group
+      split: train
+      loader: tmax_trajectory
+      license: ODC-BY
+      url: https://huggingface.co/datasets/NiuNiu0110/TMax-Agent-SFT-terminus
+      weight: 0.2
       fetch: {config: default, split: train, n_rows: 3000, page: 50, priority: 6}
     - name: agenttuning
       hf_repo: zai-org/AgentInstruct   # THUDM/AgentInstruct was renamed; HF redirects

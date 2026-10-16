@@ -4,7 +4,8 @@ written against the *real* schemas (captured in tests/fixtures/<loader>.jsonl).
 Output contract (what src/data/chat_format.py and the trainer consume):
   messages: list of {"role": system|user|assistant|tool, "content": str, ...}
             assistant turns may carry OpenAI-style "tool_calls":
-              [{"id", "type": "function", "function": {"name", "arguments": <json str>}}]
+              [{"id", "type": "function", "function": {"name", "arguments": <dict>}}]
+            (arguments is a dict, not a JSON string: Qwen3.6's template iterates it)
             tool turns carry "tool_call_id" (and "name" when the source has it).
   tools:    (optional, agent sources only) the tool schemas the trajectory was
             produced with, so the chat template can render them.
@@ -48,15 +49,22 @@ def _text(content) -> str:
 
 
 def _tool_calls(tcs) -> Optional[list]:
-    """Normalise tool calls to OpenAI format; arguments always a JSON string."""
+    """Normalise tool calls to OpenAI format with `arguments` as a dict (the Qwen3.6
+    chat template iterates `arguments | items`); a string that is not a JSON
+    object is wrapped as {"_raw": ...}."""
     if not tcs:
         return None
     out = []
     for tc in tcs:
         fn = tc.get("function") or {}
-        args = fn.get("arguments", "{}")
-        if not isinstance(args, str):
-            args = json.dumps(args, ensure_ascii=False)
+        args = fn.get("arguments", {})
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except ValueError:
+                args = {"_raw": args}
+        if not isinstance(args, dict):
+            args = {"_raw": args}
         out.append({"id": tc.get("id") or f"call_{len(out)}", "type": "function",
                     "function": {"name": fn.get("name", ""), "arguments": args}})
     return out
@@ -201,7 +209,8 @@ def terminus_trajectory(row: dict) -> Converted:
     *-sandboxes-traces-terminus-2 family): ShareGPT-ish `conversations` of
     {role, content} where the agent answers with a JSON action block; no native
     tool calls, so turns stay plain text. `task` (TB task name) or `trial_name`
-    gives meta.task_name for the TB2 blocklist."""
+    gives meta.task_name for the TB2 blocklist. Kept only when the final assistant
+    turn declares `"task_complete": true` / `"is_task_complete": true`."""
     convs = row.get("conversations")
     if not convs:
         return None
@@ -209,6 +218,11 @@ def terminus_trajectory(row: dict) -> Converted:
     trial = row.get("trial_name") or ""
     if not task and trial:
         task = trial.split("__")[0]
+    # The releases carry no verifier result; the only success signal is the agent's
+    # own final JSON flag. Episodes that stop without it mostly hit the step cap.
+    last = convs[-1].get("content") or ""
+    if not any(f'"{k}": true' in last for k in ("task_complete", "is_task_complete")):
+        return "unresolved"
     return _finish(_sharegpt_messages(convs), {"task_name": task, "trial_name": trial, "episode": row.get("episode", ""),
                                                "model": row.get("model", ""), "agent": row.get("agent", "")})
 
@@ -220,6 +234,22 @@ def agentinstruct(row: dict) -> Converted:
     if not convs:
         return None
     return _finish(_sharegpt_messages(convs), {"task_name": row.get("id", "")})
+
+
+def tmax_trajectory(row: dict) -> Converted:
+    """NiuNiu0110/TMax-Agent-SFT-terminus: OpenAI-style `messages` (system lists a
+    `bash` tool in Hermes style; calls and `<tool_response>` blocks are plain text
+    inside assistant/user turns), `trajectory_id` = `<task_group_id>__sol<k>`. The
+    trailing submit acknowledgement (a user turn) is dropped so the example ends
+    on the assistant's final answer."""
+    msgs = row.get("messages")
+    if not msgs or "task_group_id" not in row:
+        return None
+    msgs = list(msgs)
+    while msgs and msgs[-1].get("role") != "assistant":  # trailing "<tool_response>COMPLETE_TASK..." user turn
+        msgs.pop()
+    return _finish(_openai_messages(msgs), {"task_name": row["task_group_id"], "trajectory_id": row.get("trajectory_id", ""),
+                                             "model": row.get("model_name", "")})
 
 
 def openthoughts(row: dict) -> Converted:
@@ -253,6 +283,7 @@ LOADERS: "dict[str, Callable[[dict], Converted]]" = {
     "nemotron_swe": nemotron_swe,
     "terminus_trajectory": terminus_trajectory,
     "agentinstruct": agentinstruct,
+    "tmax_trajectory": tmax_trajectory,
     "openthoughts": openthoughts,
     "numina": numina,
 }

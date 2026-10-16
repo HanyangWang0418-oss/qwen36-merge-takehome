@@ -29,7 +29,7 @@ optim:
   batch_size_examples: 32
   max_seq_len: 32768
   n_train_examples: 20000
-  epochs: 2
+  epochs: 1                              # 155M train tokens per epoch; one pass keeps e3 within budget (Tinker $1.18/M)
   max_steps: null                        # derived: ceil(n_train_examples * epochs / batch_size_examples)
   grad_clip: 1.0
 
