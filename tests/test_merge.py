@@ -12,17 +12,26 @@ from safetensors.torch import load_file, save_file
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULES = [f"base_model.model.model.layers.{l}.{m}" for l in range(4) for m in
-           ("self_attn.q_proj", "mlp.experts.0.gate_proj")]
-SHAPES = {"self_attn.q_proj": (64, 32), "mlp.experts.0.gate_proj": (16, 32)}
+           ("self_attn.q_proj", "mlp.shared_expert.gate_proj", "mlp.experts.w1", "mlp.experts.w2")]
+SHAPES = {"self_attn.q_proj": (64, 32), "mlp.shared_expert.gate_proj": (16, 32)}
+E = 5  # experts in the 3D fixture
 
 
 def make_adapter(path: Path, r: int, alpha: int, seed: int):
     g = torch.Generator().manual_seed(seed)
     t = {}
     for m in MODULES:
-        out_dim, in_dim = SHAPES[m.split(".", 5)[-1]]
-        t[f"{m}.lora_A.weight"] = torch.randn(r, in_dim, generator=g)
-        t[f"{m}.lora_B.weight"] = torch.randn(out_dim, r, generator=g)
+        kind = m.split(".", 5)[-1]
+        if kind == "mlp.experts.w1":    # shared A [1,r,in], per-expert B [E,out,r]
+            t[f"{m}.lora_A.weight"] = torch.randn(1, r, 32, generator=g)
+            t[f"{m}.lora_B.weight"] = torch.randn(E, 8, r, generator=g)
+        elif kind == "mlp.experts.w2":  # per-expert A [E,r,in], shared B [1,out,r]
+            t[f"{m}.lora_A.weight"] = torch.randn(E, r, 8, generator=g)
+            t[f"{m}.lora_B.weight"] = torch.randn(1, 32, r, generator=g)
+        else:
+            out_dim, in_dim = SHAPES[kind]
+            t[f"{m}.lora_A.weight"] = torch.randn(r, in_dim, generator=g)
+            t[f"{m}.lora_B.weight"] = torch.randn(out_dim, r, generator=g)
     path.mkdir(parents=True)
     save_file(t, str(path / "adapter_model.safetensors"))
     (path / "adapter_config.json").write_text(json.dumps({
@@ -31,10 +40,19 @@ def make_adapter(path: Path, r: int, alpha: int, seed: int):
 
 
 def dense(path: Path) -> dict[str, torch.Tensor]:
+    """Dense deltas; 3D modules are expanded per expert to [E, out, in]."""
     cfg = json.loads((path / "adapter_config.json").read_text())
     s = cfg["lora_alpha"] / cfg["r"]
     t = load_file(str(path / "adapter_model.safetensors"))
-    return {m: s * (t[f"{m}.lora_B.weight"].float() @ t[f"{m}.lora_A.weight"].float()) for m in MODULES}
+    out = {}
+    for m in MODULES:
+        A, B = t[f"{m}.lora_A.weight"].float(), t[f"{m}.lora_B.weight"].float()
+        if A.dim() == 3:
+            n = max(A.shape[0], B.shape[0])
+            out[m] = torch.stack([s * (B[e if B.shape[0] > 1 else 0] @ A[e if A.shape[0] > 1 else 0]) for e in range(n)])
+        else:
+            out[m] = s * (B @ A)
+    return out
 
 
 def run(cfg: dict, tmp: Path) -> Path:
@@ -53,7 +71,7 @@ def test_task_arithmetic_is_exact(tmp_path):
     out = run({"method": "task_arithmetic", "experts": [{"path": str(a1), "lambda": 0.5}, {"path": str(a2), "lambda": 1.0}]}, tmp_path)
     d1, d2, dm = dense(a1), dense(a2), dense(out)
     for m in MODULES:
-        assert torch.allclose(dm[m], 0.5 * d1[m] + d2[m], atol=0.1, rtol=0.02)  # bf16 storage
+        assert torch.allclose(dm[m], 0.5 * d1[m] + d2[m], atol=1e-3, rtol=1e-3)
     assert json.loads((out / "adapter_config.json").read_text())["r"] == 12
 
 
@@ -66,7 +84,7 @@ def test_layer_scope(tmp_path):
     for m in MODULES:
         layer = int(m.split(".layers.")[1].split(".")[0])
         expect = d1[m] + d2[m] if layer >= 2 else d2[m]
-        assert torch.allclose(dm[m], expect, atol=0.1, rtol=0.02)
+        assert torch.allclose(dm[m], expect, atol=1e-3, rtol=1e-3)
 
 
 def test_ties_single_adapter_full_density_roundtrips(tmp_path):
@@ -75,7 +93,7 @@ def test_ties_single_adapter_full_density_roundtrips(tmp_path):
     out = run({"method": "ties", "density": 1.0, "out_rank": 4, "experts": [{"path": str(a1), "lambda": 1.0}]}, tmp_path)
     d1, dm = dense(a1), dense(out)
     for m in MODULES:
-        assert torch.allclose(dm[m], d1[m], atol=0.1, rtol=0.02)
+        assert torch.allclose(dm[m], d1[m], atol=1e-3, rtol=1e-3)
     rec = json.loads((out / "merge_recipe.json").read_text())
     assert rec["svd_rel_error"]["max"] < 1e-3
 
@@ -92,4 +110,4 @@ def test_ties_sign_election(tmp_path):
                "experts": [{"path": str(a1), "lambda": 1.0}, {"path": str(a2), "lambda": 0.5}]}, tmp_path)
     d1, dm = dense(a1), dense(out)
     for m in MODULES:  # 1.0*d vs -0.5*d: sign of d wins, mean over agreeing = d
-        assert torch.allclose(dm[m], d1[m], atol=0.1, rtol=0.02)
+        assert torch.allclose(dm[m], d1[m], atol=1e-3, rtol=1e-3)

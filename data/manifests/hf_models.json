@@ -1,0 +1,38 @@
+{
+  "e1_code_repair": {
+    "repo_id": "ssyhw7/qwen36-35b-e1_code_repair",
+    "revision": "a29d47f231ee7f2432dbce2b4b1581164a2df909",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e1_code_repair",
+    "private": false,
+    "files": [
+      ".gitattributes",
+      "README.md",
+      "adapter_config.json",
+      "adapter_model.safetensors"
+    ]
+  },
+  "e2_terminal_agent": {
+    "repo_id": "ssyhw7/qwen36-35b-e2_terminal_agent",
+    "revision": "7c7b78419db4af225c8fbf28a1e4d3d5a2e57bcf",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2_terminal_agent",
+    "private": false,
+    "files": [
+      ".gitattributes",
+      "README.md",
+      "adapter_config.json",
+      "adapter_model.safetensors"
+    ]
+  },
+  "e3_reasoning": {
+    "repo_id": "ssyhw7/qwen36-35b-e3_reasoning",
+    "revision": "014a1c5a70a69130dd2ce81c4e2bf027e58924bc",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e3_reasoning",
+    "private": false,
+    "files": [
+      ".gitattributes",
+      "README.md",
+      "adapter_config.json",
+      "adapter_model.safetensors"
+    ]
+  }
+}

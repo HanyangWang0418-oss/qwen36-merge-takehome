@@ -1,27 +1,27 @@
 #!/usr/bin/env python
-"""Merge several PEFT LoRA adapters (same base, same target modules) into one
-PEFT LoRA adapter. No base weights are needed, so this runs on a CPU box.
+"""Merge several PEFT LoRA adapters (same base, same target modules) into one PEFT LoRA adapter.
+No base weights are needed, so this runs on a CPU box.
 
-For every adapted module m, expert i contributes a dense delta
-    D_i[m] = (alpha_i / r_i) * B_i[m] @ A_i[m].
+Tensor layouts handled (as exported by Tinker for Qwen3.6-35B-A3B):
+  * dense 2D modules (attention, Gated-DeltaNet projections, shared expert, unembed):
+        lora_A: [r, in]            lora_B: [out, r]
+  * fused 3D MoE expert modules, one side shared across experts (broadcast dim 1):
+        w1/w3:  lora_A: [1, r, in]  lora_B: [E, out, r]
+        w2:     lora_A: [E, r, in]  lora_B: [1, out, r]
+    expert e's delta is scale * B[e or 0] @ A[e or 0].
+
 Methods (configs/merge/*.yaml):
-  task_arithmetic : D = sum_i lambda_i * D_i            (Ilharco et al. 2023)
-  ties            : trim each D_i to top-`density` magnitude, elect sign by
-                    summed magnitude, average agreeing entries, scale by lambda
-                    (Yadav et al. 2023)
-  dare_ties / dare_ta : Bernoulli-drop each D_i entry with p = 1-density and
-                    rescale survivors by 1/density, then ties / task_arithmetic
-                    (Yu et al. 2024)
-Output is re-expressed as a LoRA pair (A, B):
-  task_arithmetic -> exact, by row/column concatenation (rank = sum of ranks)
-  ties / dare_*   -> truncated SVD to `out_rank`; the relative Frobenius
-                    reconstruction error is logged per module and summarised,
-                    so the approximation is auditable.
-Per-expert `layers` (e.g. "0-19") restricts an expert's contribution to a
-layer range, for the layer-scope ablation. Modules not adapted by any kept
-expert are omitted (base weights are always retained by construction).
+  task_arithmetic : D = sum_i lambda_i D_i, exact as a LoRA pair by concatenation on the rank axis
+                    (keeps the broadcast layout; rank = sum of ranks)
+  ties            : trim to top-`density` magnitude per expert adapter, sign election by summed
+                    magnitude, disjoint mean of agreeing entries (Yadav et al. 2023); re-expressed
+                    by truncated SVD to `out_rank` per (module, expert); for 3D modules the result is
+                    stored per expert on both sides ([E, r, in] / [E, out, r]), so the adapter grows
+  dare_ties / dare_ta : Bernoulli-drop with p = 1-density, rescale by 1/density, then ties / sum
+Per-expert `layers` (e.g. "20-39") restricts an expert adapter to a layer range (layer-scope ablation).
+Output dtype follows the inputs (Tinker exports fp32). SVD relative errors are logged per module.
 
-    uv run python src/merge/merge_adapters.py configs/merge/ta_l0.7.yaml
+    uv run python src/merge/merge_adapters.py configs/merge/ta_l0.7.yaml [--out DIR]
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ ROOT = Path(__file__).resolve().parents[2]
 LAYER_RE = re.compile(r"\.layers\.(\d+)\.")
 
 
-def parse_layers(spec: str | None) -> set[int] | None:
+def parse_layers(spec) -> set[int] | None:
     if not spec:
         return None
     out: set[int] = set()
@@ -54,7 +54,7 @@ def parse_layers(spec: str | None) -> set[int] | None:
 
 
 class Adapter:
-    def __init__(self, path: Path, lam: float, layers: str | None):
+    def __init__(self, path: Path, lam: float, layers):
         self.path = path
         self.cfg = json.loads((path / "adapter_config.json").read_text())
         self.r = int(self.cfg["r"])
@@ -62,9 +62,11 @@ class Adapter:
         self.scale = self.alpha / self.r
         self.lam = lam
         self.layers = parse_layers(layers)
-        self.f = safe_open(str(path / "adapter_model.safetensors"), framework="pt")
-        keys = list(self.f.keys())
-        self.modules = sorted({k.rsplit(".lora_", 1)[0] for k in keys if ".lora_A" in k})
+        files = sorted(path.glob("adapter_model*.safetensors"))
+        assert files, f"no adapter_model*.safetensors in {path}"
+        self.handles = [safe_open(str(f), framework="pt") for f in files]
+        self.key2h = {k: h for h in self.handles for k in h.keys()}
+        self.modules = sorted({k.rsplit(".lora_", 1)[0] for k in self.key2h if ".lora_A" in k})
 
     def active(self, module: str) -> bool:
         if self.layers is None:
@@ -73,16 +75,15 @@ class Adapter:
         return m is not None and int(m.group(1)) in self.layers
 
     def ab(self, module: str) -> tuple[torch.Tensor, torch.Tensor]:
-        a = self.f.get_tensor(f"{module}.lora_A.weight").float()
-        b = self.f.get_tensor(f"{module}.lora_B.weight").float()
+        a = self.key2h[f"{module}.lora_A.weight"].get_tensor(f"{module}.lora_A.weight")
+        b = self.key2h[f"{module}.lora_B.weight"].get_tensor(f"{module}.lora_B.weight")
         return a, b
 
-    def delta(self, module: str) -> torch.Tensor:
-        a, b = self.ab(module)
-        return self.scale * (b @ a)
+    def dtype(self, module: str) -> torch.dtype:
+        return self.key2h[f"{module}.lora_A.weight"].get_tensor(f"{module}.lora_A.weight").dtype
 
 
-# ------------------------------------------------------------------ dense ops
+# ------------------------------------------------------------------ dense ops (2D)
 def dare(d: torch.Tensor, density: float, gen: torch.Generator) -> torch.Tensor:
     if density >= 1.0:
         return d
@@ -107,7 +108,7 @@ def ties(deltas: list[torch.Tensor], lams: list[float], density: float) -> torch
 
 
 def svd_lowrank(d: torch.Tensor, rank: int) -> tuple[torch.Tensor, torch.Tensor, float]:
-    """Return (A, B) with B@A ≈ d, A: rank×in, B: out×rank, plus relative Frobenius error."""
+    """(A [rank,in], B [out,rank]) with B@A ≈ d, plus relative Frobenius error."""
     u, s, vh = torch.linalg.svd(d, full_matrices=False)
     k = min(rank, s.numel())
     b = u[:, :k] * s[:k]
@@ -116,11 +117,18 @@ def svd_lowrank(d: torch.Tensor, rank: int) -> tuple[torch.Tensor, torch.Tensor,
     return a.contiguous(), b.contiguous(), err
 
 
+def expert_delta(a: torch.Tensor, b: torch.Tensor, e: int, scale: float) -> torch.Tensor:
+    """Dense delta of expert e for a 3D module with broadcast on either side."""
+    ae = a[e if a.shape[0] > 1 else 0].float()
+    be = b[e if b.shape[0] > 1 else 0].float()
+    return scale * (be @ ae)
+
+
 # ------------------------------------------------------------------ main
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("config")
-    ap.add_argument("--out", default=None, help="override output dir")
+    ap.add_argument("--out", default=None)
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text())
     method = cfg["method"]
@@ -141,46 +149,72 @@ def main() -> int:
     errors: dict[str, float] = {}
     per_layer_err: dict[str, list[float]] = defaultdict(list)
     ranks_out: set[int] = set()
-    skipped = 0
+    skipped = n3d = 0
     for mi, m in enumerate(modules):
         contrib = [a for a in adapters if m in a.modules and a.active(m)]
         if not contrib:
             skipped += 1
             continue
+        a0, b0 = contrib[0].ab(m)
+        is3d = a0.dim() == 3
+        dt = a0.dtype
         if method == "task_arithmetic":
-            # exact: B_merged = [lam_i * scale_i * B_i], A_merged = [A_i] stacked on rank dim
+            # exact: A_merged = cat_i A_i on the rank axis, B_merged = cat_i (lam_i*scale_i) B_i on the rank axis
             As, Bs = [], []
             for a in contrib:
                 A, B = a.ab(m)
                 As.append(A)
-                Bs.append(a.lam * a.scale * B)
-            A_m = torch.cat(As, 0)
-            B_m = torch.cat(Bs, 1)
+                Bs.append((a.lam * a.scale) * B.float())
+            if is3d:
+                A_m = torch.cat(As, 1)
+                B_m = torch.cat(Bs, 2)
+                r_out = A_m.shape[1]
+            else:
+                A_m = torch.cat(As, 0)
+                B_m = torch.cat(Bs, 1)
+                r_out = A_m.shape[0]
             err = 0.0
         else:
-            deltas = [a.delta(m) for a in contrib]
             lams = [a.lam for a in contrib]
-            if method.startswith("dare"):
-                deltas = [dare(d, density, gen) for d in deltas]
-            if method in ("ties", "dare_ties"):
-                D = ties(deltas, lams, density if method == "ties" else 1.0)
-            elif method == "dare_ta":
-                D = sum(l * d for l, d in zip(lams, deltas))
+            if is3d:
+                E = max(a0.shape[0], b0.shape[0])
+                A_list, B_list, errs = [], [], []
+                for e in range(E):
+                    deltas = [expert_delta(*a.ab(m), e, a.scale) for a in contrib]
+                    if method.startswith("dare"):
+                        deltas = [dare(d, density, gen) for d in deltas]
+                    D = ties(deltas, lams, density if method == "ties" else 1.0) if method in ("ties", "dare_ties") else sum(l * d for l, d in zip(lams, deltas))
+                    Ae, Be, ee = svd_lowrank(D, out_rank)
+                    A_list.append(Ae); B_list.append(Be); errs.append(ee)
+                A_m = torch.stack(A_list)      # [E, r, in]
+                B_m = torch.stack(B_list)      # [E, out, r]
+                r_out = out_rank
+                err = float(sum(errs) / len(errs))
             else:
-                raise ValueError(method)
-            A_m, B_m, err = svd_lowrank(D, out_rank)
-        # store with scaling folded in: alpha == r so PEFT scaling is 1.0
-        tensors[f"{m}.lora_A.weight"] = A_m.to(torch.bfloat16)
-        tensors[f"{m}.lora_B.weight"] = B_m.to(torch.bfloat16)
-        ranks_out.add(A_m.shape[0])
+                deltas = [a.scale * (a.ab(m)[1].float() @ a.ab(m)[0].float()) for a in contrib]
+                if method.startswith("dare"):
+                    deltas = [dare(d, density, gen) for d in deltas]
+                if method in ("ties", "dare_ties"):
+                    D = ties(deltas, lams, density if method == "ties" else 1.0)
+                elif method == "dare_ta":
+                    D = sum(l * d for l, d in zip(lams, deltas))
+                else:
+                    raise ValueError(method)
+                A_m, B_m, err = svd_lowrank(D, out_rank)
+                r_out = out_rank
+        n3d += int(is3d)
+        # scaling folded into B: alpha == r so PEFT scaling is 1.0
+        tensors[f"{m}.lora_A.weight"] = A_m.to(dt).contiguous()
+        tensors[f"{m}.lora_B.weight"] = B_m.to(dt).contiguous()
+        ranks_out.add(int(r_out))
         errors[m] = err
         lm = LAYER_RE.search(m)
         per_layer_err[lm.group(1) if lm else "other"].append(err)
-        if mi % 500 == 0:
-            print(f"{mi}/{len(modules)} {m} rank={A_m.shape[0]} err={err:.4f}")
+        if mi % 100 == 0:
+            print(f"{mi}/{len(modules)} {m.split('.model.')[-1]} 3d={is3d} rank={r_out} err={err:.4f}", flush=True)
 
     if len(ranks_out) != 1:
-        raise RuntimeError(f"PEFT needs one rank per adapter, got {sorted(ranks_out)}; set out_rank or equal expert ranks")
+        raise RuntimeError(f"PEFT needs one rank per adapter, got {sorted(ranks_out)}")
     r = ranks_out.pop()
     if out.exists():
         shutil.rmtree(out)
@@ -198,9 +232,10 @@ def main() -> int:
         "method": method,
         "density": density,
         "out_rank": r,
-        "experts": [{"path": str(a.path.relative_to(ROOT)) if a.path.is_relative_to(ROOT) else str(a.path), "r": a.r, "alpha": a.alpha,
-                     "lambda": a.lam, "layers": sorted(a.layers) if a.layers else "all"} for a in adapters],
+        "experts": [{"path": str(a.path), "r": a.r, "alpha": a.alpha, "lambda": a.lam,
+                     "layers": sorted(a.layers) if a.layers else "all"} for a in adapters],
         "n_modules_merged": len(errors),
+        "n_modules_3d": n3d,
         "n_modules_skipped": skipped,
         "svd_rel_error": {"mean": errs.mean().item(), "max": errs.max().item(), "p90": errs.quantile(0.9).item()},
         "svd_rel_error_by_layer": {k: sum(v) / len(v) for k, v in sorted(per_layer_err.items(), key=lambda kv: kv[0])},
@@ -210,9 +245,10 @@ def main() -> int:
             "dare_ties": "random drop + rescale before TIES sign election",
             "dare_ta": "random drop + rescale, then additive",
         }[method],
+        "layout_note": "3D MoE modules: task_arithmetic keeps the shared-side broadcast layout; SVD-based methods store per-expert A and B",
     }
     (out / "merge_recipe.json").write_text(json.dumps(recipe, indent=2))
-    print(json.dumps({k: recipe[k] for k in ("method", "out_rank", "n_modules_merged", "svd_rel_error")}, indent=2))
+    print(json.dumps({k: recipe[k] for k in ("method", "out_rank", "n_modules_merged", "n_modules_3d", "svd_rel_error")}, indent=2))
     print(f"wrote {out}")
     return 0
 
