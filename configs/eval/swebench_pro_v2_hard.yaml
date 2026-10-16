@@ -22,7 +22,7 @@ harness:
   harbor_version: ">=0.22"               # pin exact version in requirements.lock
   task_dir: v2/tasks
   container_image_pattern: "ghcr.io/scaleapi/swe-bench_pro-v2:<instance_id>"
-  sandbox_env: modal                     # official leaderboard env; docker is allowed but must be declared
+  sandbox_env: ack                       # 本实验设置: Alibaba Cloud ACS + Agent Sandbox via harbor `-e ack` (official protocol uses modal); see docs/infra_aliyun.md
 
 agent:
   name: locked_mini_swe:LockedMiniSwe   # self-hosted models use the mini-swe-agent locked agent
