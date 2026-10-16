@@ -71,7 +71,7 @@ def mean_loss(result, batch: list[dict]) -> float:
     # Tinker returns per-token logprobs in result.loss_fn_outputs; normalise by weighted tokens.
     total, n = 0.0, 0
     for out, ex in zip(result.loss_fn_outputs, batch):
-        lp = out["logprobs"].tolist() if hasattr(out["logprobs"], "tolist") else out["logprobs"]
+        lp = out["logprobs"].tolist()  # tinker.types.TensorData
         w = ex["weights"][1:]
         total += -sum(l * wi for l, wi in zip(lp, w))
         n += sum(w)
@@ -132,11 +132,15 @@ def main() -> int:
     from tinker import types
 
     service = tinker.ServiceClient()
+    lora_flags = {"train_mlp": True, "train_attn": True, "train_unembed": True, **cfg["lora"].get("tinker_flags", {})}
     client = service.create_lora_training_client(
         base_model=cfg["base"]["tinker_model"],
         rank=cfg["lora"]["rank"],
         seed=cfg["seed"],
+        user_metadata={"run_id": run_id, "expert": cfg["expert_name"]},
+        **lora_flags,
     )
+    metadata["lora_flags"] = lora_flags
     lr0 = cfg["optim"]["learning_rate"]
     warmup = cfg["optim"]["warmup_steps"]
 

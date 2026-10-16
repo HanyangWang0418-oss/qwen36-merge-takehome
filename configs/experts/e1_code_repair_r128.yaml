@@ -16,7 +16,8 @@ method: lora                             # Tinker only offers LoRA; full FT is o
 lora:
   rank: 128
   alpha: 256                              # Tinker convention alpha = 2 * rank unless overridden
-  target_modules: all_linear             # Tinker applies LoRA to attention + MLP + MoE experts; exact list read from exported adapter_config.json
+  target_modules: all_linear             # Tinker flags below; exact HF module list read from exported adapter_config.json
+  tinker_flags: {train_attn: true, train_mlp: true, train_unembed: true}   # create_lora_training_client kwargs; MoE experts fall under train_mlp
   dropout: 0.0
 quantization: none                       # bf16 on Tinker
 
