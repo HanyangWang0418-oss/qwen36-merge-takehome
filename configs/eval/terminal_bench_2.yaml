@@ -5,13 +5,13 @@ secondary_metrics: [success_rate_std, per_run_success_rate, env_failure_rate, ti
 
 dataset:
   harbor_registry: terminal-bench/terminal-bench
-  version: LOCK                          # exact 2.0.x tag, never @latest
-  n_tasks: LOCK                          # fill from snapshot
+  version: 2.0                          # exact 2.0.x tag, never @latest
+  n_tasks: 89                          # fill from snapshot
   task_list_file: data/manifests/terminal_bench_2_tasks.json
 
 harness:
   repo: https://github.com/harbor-framework/terminal-bench
-  commit: LOCK
+  commit: 2e29ca91d5f1cb6fb60924bf867acc755565c044
   runner: harbor
   harbor_version: LOCK
   sandbox_env: modal

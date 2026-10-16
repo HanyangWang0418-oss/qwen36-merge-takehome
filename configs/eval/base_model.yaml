@@ -1,8 +1,8 @@
 # Base model lock
 model_id: Qwen/Qwen3.6-35B-A3B
-hf_revision: LOCK                        # commit sha, filled by scripts/lock_benchmarks.py
+hf_revision: 995ad96eacd98c81ed38be0c5b274b04031597b0                        # commit sha, filled by scripts/lock_benchmarks.py
 tokenizer_revision: same_as_model
-chat_template_sha256: LOCK               # sha256 of tokenizer_config.json chat_template string
+chat_template_sha256: e84f32a23fdda27689f868aa4a1a5621f41133e51a48d7f3efcbea2839574259               # sha256 of tokenizer_config.json chat_template string
 architecture:
   total_params_b: 35
   active_params_b: 3

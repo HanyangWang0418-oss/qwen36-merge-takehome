@@ -83,40 +83,30 @@ def lock_swebench_pro() -> None:
 
 # ---------------------------------------------------------------- Terminal-Bench
 def lock_terminal_bench() -> None:
-    repo = "harbor-framework/terminal-bench"
-    sha = github_head_sha(repo)
-    # Task list: use the harbor CLI when installed, else fall back to the GitHub tree.
-    tasks: list[str] = []
-    version = os.environ.get("TB_VERSION", "")
-    try:
-        out = subprocess.run(
-            ["harbor", "datasets", "tasks", f"terminal-bench/terminal-bench@{version or '2.0'}"],
-            capture_output=True, text=True, timeout=120, check=True,
-        ).stdout
-        tasks = [t.strip() for t in out.splitlines() if t.strip()]
-    except Exception as exc:  # noqa: BLE001
-        print(f"harbor CLI unavailable ({exc}); falling back to GitHub tree listing")
-        r = requests.get(
-            f"https://api.github.com/repos/{repo}/git/trees/{sha}?recursive=1", timeout=60
-        )
-        r.raise_for_status()
-        tasks = sorted(
-            {
-                p["path"].split("/")[1]
-                for p in r.json()["tree"]
-                if p["path"].startswith("tasks/") and p["path"].count("/") == 1 and p["type"] == "tree"
-            }
-        )
+    """Task list comes from Harbor's dataset registry (the same source `harbor run -d` uses),
+    pinned to the registry entry's git commit. The harness commit is harbor-framework/terminal-bench HEAD."""
+    harbor_sha = github_head_sha("harbor-framework/harbor")
+    reg = requests.get(f"https://raw.githubusercontent.com/harbor-framework/harbor/{harbor_sha}/registry.json", timeout=120)
+    reg.raise_for_status()
+    entries = [e for e in reg.json() if e.get("name") == "terminal-bench" and str(e.get("version")).startswith("2.")]
+    assert entries, "terminal-bench 2.x not found in harbor registry"
+    entry = sorted(entries, key=lambda e: str(e["version"]))[-1]
+    tasks = entry["tasks"]
+    commits = {t.get("git_commit_id") for t in tasks}
+    urls = {t.get("git_url") for t in tasks}
     write(
         "terminal_bench_2_tasks.json",
         {
             "locked_at": now(),
-            "harness_repo": repo,
-            "harness_commit": sha,
+            "harness_repo": "harbor-framework/terminal-bench",
+            "harness_commit": github_head_sha("harbor-framework/terminal-bench"),
+            "harbor_repo_commit_for_registry": harbor_sha,
             "registry": "terminal-bench/terminal-bench",
-            "version": version or "LOCK: set TB_VERSION to the exact 2.0.x tag",
+            "version": str(entry["version"]),
+            "dataset_git_url": sorted(u for u in urls if u),
+            "dataset_git_commit": sorted(c for c in commits if c),
             "n_tasks": len(tasks),
-            "task_ids": tasks,
+            "task_ids": sorted(t["name"] if isinstance(t, dict) else t for t in tasks),
             "seeds": [1, 2, 3, 4, 5],
         },
     )
@@ -158,11 +148,19 @@ def lock_asi_bench(track: str) -> None:
     r.raise_for_status()
     task_dirs = sorted(
         {
-            p["path"].split("/")[1]
+            p["path"][len("tasks/"):]
             for p in r.json()["tree"]
-            if p["path"].startswith("tasks/") and p["path"].count("/") == 1 and p["type"] == "tree"
+            if p["path"].startswith("tasks/") and p["path"].count("/") == 2 and p["type"] == "tree"
+            and not p["path"].split("/")[1].startswith("_")
         }
     )
+    domains = sorted({d.split("/")[0] for d in task_dirs})
+    # The HF dataset is the authoritative instance list for the track (60 instances, one per project).
+    hdr = {"Authorization": f"Bearer {os.environ['HF_TOKEN']}"} if os.environ.get("HF_TOKEN") else {}
+    tree = requests.get(f"https://huggingface.co/api/datasets/{hf_repo}/tree/{rev}/tasks", headers=hdr, timeout=60)
+    tree.raise_for_status()
+    instance_ids = sorted(x["path"].split("/")[-1] for x in tree.json() if x.get("type") == "directory")
+    meta = requests.get(f"https://huggingface.co/datasets/{hf_repo}/resolve/{rev}/metadata.json", headers=hdr, timeout=60).json()
     write(
         "asi_bench_tasks.json",
         {
@@ -172,8 +170,12 @@ def lock_asi_bench(track: str) -> None:
             "track": track,
             "dataset_hf_repo": hf_repo,
             "dataset_hf_revision": rev,
+            "dataset_metadata": {k: meta.get(k) for k in ("name", "seed", "task_count", "contains_answers", "source_repository", "source_commit", "published_at_utc")},
+            "n_instances": len(instance_ids),
+            "instance_ids": instance_ids,
             "levels": ["B1", "B2", "B3", "B4"],
-            "n_projects": len(task_dirs),
+            "n_projects_in_repo": len(task_dirs),
+            "domains": domains,
             "project_ids": task_dirs,
             "primary_metric": "b3_mean_final_score",
         },

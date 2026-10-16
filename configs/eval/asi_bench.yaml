@@ -10,8 +10,8 @@ secondary_metrics: [b1_mean, b2_mean, b4_mean, all_levels_mean, n_invalid, env_f
 dataset:
   official_track_repo: Apexintelligence-AI/ASI-Bench-seed42      # private references, website scoring
   local_track_repo: Apexintelligence-AI/ASI-Bench-seed31415      # public references, local scoring
-  track_used: LOCK                        # seed42 if interviewer confirms multi-submission; else seed31415 (disclosed)
-  hf_revision: LOCK
+  track_used: seed42  # pending interviewer confirmation of multi-submission; else switch to seed31415 and re-lock                        # seed42 if interviewer confirms multi-submission; else seed31415 (disclosed)
+  hf_revision: 4533397770a85ef79afe31e0361cbd9c42d5b50d
   n_projects: 60
   levels: [B1, B2, B3, B4]
   n_evaluations: 240
@@ -19,7 +19,7 @@ dataset:
 
 harness:
   repo: https://github.com/apexin-ai/ASI-Bench
-  commit: LOCK
+  commit: cf07cb89d8590d958ff42db7ae3d6608f5eb9dbc
   cli: asibench
   cli_version: "0.2.0"
   sandbox: os                             # docker; linux_ns also acceptable for local track

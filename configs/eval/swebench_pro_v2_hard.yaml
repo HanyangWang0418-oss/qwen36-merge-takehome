@@ -10,14 +10,14 @@ dataset:
   hf_repo: ScaleAI/SWE-bench_Pro
   hf_config: hard
   split: test
-  hf_revision: LOCK                      # dataset commit sha
+  hf_revision: 2d52cb3df914a3fcf80c7f66738b3a88ae37fc50                      # dataset commit sha
   n_tasks: 51
   task_id_source: https://github.com/scaleapi/SWE-bench_Pro-os/blob/main/v2/hard51_ids.txt
   hard_split_basis: "51 of 642 V2 tasks that Scale found hardest across models (Scale blog, 2026-09-22)"
 
 harness:
   repo: https://github.com/scaleapi/SWE-bench_Pro-os
-  commit: LOCK
+  commit: 66f92766bba642462d4bbe5479e83f91f9211862
   runner: harbor
   harbor_version: ">=0.22"               # pin exact version in requirements.lock
   task_dir: v2/tasks
@@ -31,9 +31,9 @@ agent:
   model_endpoint: openai_compatible      # OPENAI_API_BASE -> our vLLM server
   network: no-network                    # agent sandbox offline; only model host allowed
   disallowed_tools: [WebFetch, WebSearch]
-  max_steps: LOCK                        # from mini_toolcall.yaml, record the value
+  max_steps: 0  # mini_toolcall.yaml step_limit=0: unbounded, time-bounded by per_task_timeout_s                        # from mini_toolcall.yaml, record the value
   per_task_timeout_s: 3000               # 50 min, enforced in-sandbox; partial patch still graded
-  token_budget: LOCK                     # record the step/token cap from config
+  token_budget: cost_limit 3.0 (litellm USD; 0 for a self-hosted endpoint, so effectively time-bounded only)                     # record the step/token cap from config
 
 grading:
   method: patch_replay                   # patch_replay:PatchReplayAgent on pristine image
