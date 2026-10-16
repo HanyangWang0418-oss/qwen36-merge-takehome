@@ -1,0 +1,18 @@
+title: "Qwen3.6-35B-A3B 多专家 LoRA 训练与合版实验"
+subtitle: "候选人仓库 https://github.com/HanyangWang0418-oss/qwen36-merge-takehome · HF ssyhw7 · 基座 revision 995ad96e"
+# 摘要须为 150–200 个中文字符；最终数字由 results/summary.csv 回填后再定稿。
+abstract: |
+  以 Qwen3.6-35B-A3B（MoE，35B 总参 / 3B 激活）为基座，按任务形态划分三个 LoRA 专家：代码修复（SWE-bench Pro）、终端与科研执行（Terminal-Bench、ASI-Bench）、长推理（HLE），在 Tinker 上训练后以任务算术与 TIES 两种方法合并为单一 adapter，并在四项 benchmark 固定版本上比较 Base、各专家与合版模型。结果：宏平均相对 Base 变化 __ 个百分点（配对 bootstrap 95% CI __），各项收益与退化见下表。
+process: |
+  数据：公开轨迹与推理数据的带宽受限采样（e1 1,206 / e2 2,718 / e3 4,831 条），仅保留验证通过的轨迹；按仓库、任务名、canary 与 13-gram 过滤 benchmark 污染；dev 集独立于评测集。训练：LoRA rank 32，覆盖注意力、MLP 与 MoE 专家矩阵，LR 1e-4 cosine，batch 32，上下文 32K，seed 42；按 dev loss 选 checkpoint。合版：adapter 层面 task arithmetic（精确拼接，λ=0.7）与 TIES（density 0.2，SVD 回压 rank 96）；消融 λ、density、层范围、3 vs 4 专家。评测：vLLM 同一基座热切换 adapter，thinking 开，bf16；SWE-bench Pro hard-51 用 mini-swe-agent 50 分钟预算并在干净沙箱重判；TB2 五次运行；HLE text-only 2,158 题、o3-mini 判分；ASI seed42 B3 均值。
+models: [base, e1_code_repair, e2_terminal_agent, e3_reasoning, merged_ta_l0.7, merged_ties_d0.2]
+model_labels:
+  base: Base
+  e1_code_repair: E1 代码修复
+  e2_terminal_agent: E2 终端/科研
+  e3_reasoning: E3 推理
+  merged_ta_l0.7: 合版 TA λ0.7
+  merged_ties_d0.2: 合版 TIES d0.2
+results_notes: |
+  * 专家仅在其目标 benchmark 上评测（"–"为未评测）。分数为百分制主指标与 95% bootstrap 置信区间；Δ 为相同任务配对 bootstrap。TB2 为五次运行均值，标准差见仓库 analysis/。环境失败单列并计入分母。沙箱提供方与官方不同，已在 README 披露。
+footer: "详细日志、逐任务结果、20 个失败案例与置信区间见仓库 logs/、results/、analysis/；本页由 scripts/make_report.py 从原始结果生成。"
