@@ -15,3 +15,5 @@ training, no e3 retraining; only work that certainly moves the project forward o
 
 Open for the owner: GPU box (2× A100) SSH; OpenAI key (HLE judge); ASI judge key; interviewer confirmations;
 whether to train the control experts (~$100) and whether to pursue e3 RFT.
+| 8 | TIES merge needed two more attempts: per-expert SVD output (~24 GB) OOM'd the runner, then direct SVD of a 248k×2k dense delta OOM'd; final version uses a Gram-matrix chunked factorisation (exact equivalent of truncated SVD) and finished in 2h40 | keeps the exported shared-side layout and the 6.74 GB size | free |
+| 9 | Finding: TIES (density 0.2) re-expressed at rank 96 has mean relative error 0.49 (unembed 0.20, MoE layers up to 0.52): trimming destroys low-rank structure. Logged in the recipe; candidates for ablation: higher out_rank (256) or density 1.0 | affects how the TIES result is interpreted | 0 |

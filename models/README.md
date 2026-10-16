@@ -7,8 +7,8 @@ All adapters are PEFT LoRA on `Qwen/Qwen3.6-35B-A3B` revision `<fill from data/m
 | e1_code_repair | https://huggingface.co/ssyhw7/qwen36-35b-e1_code_repair | `a29d47f231ee7f2432dbce2b4b1581164a2df909` | LoRA r32 α32, fp32, 2.24 GB | – |
 | e2_terminal_agent | https://huggingface.co/ssyhw7/qwen36-35b-e2_terminal_agent | `7c7b78419db4af225c8fbf28a1e4d3d5a2e57bcf` | LoRA r32 α32, fp32, 2.24 GB | – |
 | e3_reasoning | https://huggingface.co/ssyhw7/qwen36-35b-e3_reasoning | `014a1c5a70a69130dd2ce81c4e2bf027e58924bc` | LoRA r32 α32, fp32, 2.24 GB | – |
-| merged_ta_l0.7 | https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7 | (pending) | LoRA r96 (exact concat) | `configs/merge/ta_l0.7.yaml` |
-| merged_ties_d0.2 | https://huggingface.co/ssyhw7/qwen36-35b-merged-ties_d0.2 | (pending) | LoRA r96 (per-expert SVD) | `configs/merge/ties_d0.2.yaml` |
+| merged_ta_l0.7 | https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7 | `d8da199b6ed6fa6a0a6dadd418692d210e0614e4` | LoRA r96, fp32, 6.74 GB (exact rank concatenation, no approximation) | `configs/merge/ta_l0.7.yaml`, `data/manifests/merge_recipes/merged_ta_l0.7.json` |
+| merged_ties_d0.2 | https://huggingface.co/ssyhw7/qwen36-35b-merged-ties_d0.2 | `d9ce9d15a9ec5a6de5acc0f7b0cb8682ff862aa5` | LoRA r96, fp32, 6.74 GB (joint Gram-SVD re-expression; rel. Frobenius error mean 0.49 / max 0.56 — TIES trimming makes the merged delta high-rank, so ~24% of its energy is lost at rank 96) | `configs/merge/ties_d0.2.yaml`, `data/manifests/merge_recipes/merged_ties_d0.2.json` |
 
 ## Loading
 
