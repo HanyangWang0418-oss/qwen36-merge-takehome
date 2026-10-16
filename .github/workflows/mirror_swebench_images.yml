@@ -1,0 +1,55 @@
+name: mirror-swebench-pro-images
+# Copies the 51 SWE-bench Pro v2 HARD task images from ghcr.io into ACR (Hangzhou) using
+# GitHub-hosted runners (fast ghcr access; mainland-China nodes get ~14 KB/s from ghcr).
+# Secrets: ACR_HOST, ACR_NAMESPACE, ACR_USERNAME, ACR_PASSWORD. Idempotent: skopeo skips
+# blobs that already exist. ~0.9 GB compressed per image, 51 images, runs as a 6-way matrix.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "comma-separated instance ids (empty = all 51)"
+        required: false
+        default: ""
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        run: |
+          python3 - "${{ github.event.inputs.only }}" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          ids = json.load(open("data/manifests/swebench_pro_v2_hard.json"))["task_ids"]
+          only = [x for x in sys.argv[1].split(",") if x]
+          ids = [i for i in ids if not only or i in only]
+          n = 6  # shards
+          shards = [ids[k::n] for k in range(n)]
+          print("matrix=" + json.dumps({"include": [{"shard": k, "ids": " ".join(s)} for k, s in enumerate(shards) if s]}))
+          PY
+  mirror:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - name: install skopeo
+        run: sudo apt-get update -q && sudo apt-get install -y -q skopeo && skopeo --version
+      - name: login ACR
+        run: echo "${{ secrets.ACR_PASSWORD }}" | skopeo login --username "${{ secrets.ACR_USERNAME }}" --password-stdin "${{ secrets.ACR_HOST }}"
+      - name: copy shard ${{ matrix.shard }}
+        run: |
+          set -u
+          fail=0
+          for id in ${{ matrix.ids }}; do
+            src="docker://ghcr.io/scaleapi/swe-bench_pro-v2:$id"
+            dst="docker://${{ secrets.ACR_HOST }}/${{ secrets.ACR_NAMESPACE }}/swe-bench_pro-v2:$id"
+            if skopeo inspect --raw "$dst" >/dev/null 2>&1 && [ "$(skopeo inspect --format '{{.Digest}}' "$src")" = "$(skopeo inspect --format '{{.Digest}}' "$dst")" ]; then
+              echo "skip $id"; continue; fi
+            echo "copy $id"
+            # single-platform linux/amd64 (what the sandbox builder needs); retries cover transient errors
+            skopeo copy --override-os linux --override-arch amd64 --retry-times 5 "$src" "$dst" || { echo "FAIL $id"; fail=1; }
+          done
+          exit $fail

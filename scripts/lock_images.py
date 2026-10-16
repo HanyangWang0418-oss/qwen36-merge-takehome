@@ -37,7 +37,7 @@ def main() -> int:
     elif bench == "terminal_bench_2":
         m = json.loads((ROOT / "data/manifests/terminal_bench_2_tasks.json").read_text())
         c8 = m["dataset_git_commit"][0][:8]
-        pairs = [(f"build:{m['dataset_git_url'][0]}@{m['dataset_git_commit'][0]}/{t}/environment", f"{ACR}/{t}:{c8}", t) for t in m["task_ids"]]
+        pairs = [(f"build:{m['dataset_git_url'][0]}@{m['dataset_git_commit'][0]}/{t}/environment", f"{ACR}/tb2-{t}:{c8}", t) for t in m["task_ids"]]
     else:
         raise SystemExit("bench must be swebench_pro or terminal_bench_2")
 

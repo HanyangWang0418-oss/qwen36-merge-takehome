@@ -49,3 +49,9 @@ vLLM, base + LoRA hot-swap, ≥ 2 × 80 GB-class GPUs for 256K context. Mainland
 
 ## Fallback: ACS 容器版 + `harbor -e ack`
 Kubernetes API via kubeconfig, images built in-cluster (privileged DinD or BuildKit) and pushed to ACR, SandboxSet/SandboxClaim pools, per-task CPU/memory from task.toml. More setup (cluster, add-ons `acs-virtual-node ≥ 2.17.0`, `ack-agent-sandbox-controller ≥ 0.5.14`, RAM role), but real NetworkPolicy enforcement and no 极速版 spec limits. Use if the 极速版 spec cap or network isolation turns out unacceptable.
+
+## Bandwidth findings (2026-10-17) and the image pipeline that follows
+- Hangzhou sandbox → ghcr.io blob CDN: **~14 KB/s** (62 GB would take ~50 days); Docker Hub and gcr unreachable; quay.io and public.ecr.aws reachable. ACR (public endpoint) reachable from the sandbox (401 in 40 ms), unreachable from the laptop's corporate network.
+- Therefore images are moved by **GitHub Actions** (foreign runners, fast ghcr): `.github/workflows/mirror_swebench_images.yml` (skopeo, 6 shards) and `.github/workflows/build_tb2_images.yml` (buildx, 10 shards, locked dataset commit). Repository secrets: `ACR_HOST`, `ACR_NAMESPACE`, `ACR_USERNAME`, `ACR_PASSWORD`. Image names: `<ns>/swe-bench_pro-v2:<instance_id>` and `<ns>/tb2-<task>:<commit8>`.
+- `src/eval/registry_copy.py` (pure-Python copier with Range-resume) remains for small fixes from inside a sandbox; `scripts/mirror_images.sh` / `build_tb2_images.sh` remain for an ECS box.
+- ACR namespace in use: `qwen36-1017` (personal edition, auto-create repositories on).

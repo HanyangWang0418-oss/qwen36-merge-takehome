@@ -16,8 +16,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
+import tempfile
 import time
 
 import requests
@@ -105,11 +107,43 @@ class Registry:
         return r.headers.get("Docker-Content-Digest", "sha256:" + hashlib.sha256(body).hexdigest())
 
 
+def download_with_resume(src: "Registry", repo: str, digest: str, size: int | None, chunk_mb: int, retries: int) -> str:
+    """Stream a blob to a temp file, resuming with HTTP Range on stalls; verifies the sha256."""
+    fd, path = tempfile.mkstemp(prefix="blob-", dir=os.environ.get("BLOB_TMP", None))
+    os.close(fd)
+    got, attempt, h = 0, 0, hashlib.sha256()
+    while True:
+        try:
+            hdr = {"Range": f"bytes={got}-"} if got else {}
+            r = src._req("GET", f"/v2/{repo}/blobs/{digest}", headers=hdr, stream=True, timeout=(30, 60))
+            if r.status_code not in (200, 206):
+                raise RuntimeError(f"blob get {r.status_code}")
+            if r.status_code == 200 and got:  # server ignored Range: restart
+                got, h = 0, hashlib.sha256()
+                open(path, "wb").close()
+            with open(path, "ab") as f:
+                for part in r.iter_content(chunk_mb * 1024 * 1024):
+                    f.write(part); h.update(part); got += len(part)
+            if size is not None and got < size:
+                raise RuntimeError(f"short read {got}/{size}")
+            break
+        except Exception as e:  # noqa: BLE001
+            attempt += 1
+            if attempt > retries:
+                raise
+            print(f"    resume {attempt}/{retries} at {got / 1e6:.0f} MB ({type(e).__name__})", flush=True)
+            time.sleep(min(30, 2 * attempt))
+    if h.hexdigest() != digest.split(":", 1)[1]:
+        raise RuntimeError(f"digest mismatch for {digest}")
+    return path
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("src"); ap.add_argument("dst")
     ap.add_argument("--src-user"); ap.add_argument("--src-pass"); ap.add_argument("--dst-user"); ap.add_argument("--dst-pass")
     ap.add_argument("--chunk-mb", type=int, default=16)
+    ap.add_argument("--retries", type=int, default=20, help="per-blob resume attempts")
     a = ap.parse_args()
     sh, srepo, sref = parse_ref(a.src)
     dh, drepo, dtag = parse_ref(a.dst)
@@ -132,8 +166,13 @@ def main() -> int:
         if dst.blob_exists(drepo, d):
             print(f"  [{i + 1}/{len(layers)}] exists {d[:19]}", flush=True); continue
         t1 = time.time()
-        with src.open_blob(srepo, d) as r:
-            dst.push_blob_stream(drepo, d, r.iter_content(a.chunk_mb * 1024 * 1024), l.get("size"), a.chunk_mb)
+        # Download to a temp file with Range-resume (ghcr's CDN stalls from some regions), then upload.
+        tmp = download_with_resume(src, srepo, d, l.get("size"), a.chunk_mb, a.retries)
+        try:
+            with open(tmp, "rb") as fh:
+                dst.push_blob_stream(drepo, d, fh, l.get("size"), a.chunk_mb)
+        finally:
+            os.unlink(tmp)
         copied += l.get("size", 0)
         dt = time.time() - t1
         print(f"  [{i + 1}/{len(layers)}] copied {d[:19]} {l.get('size', 0) / 1e6:.0f} MB in {dt:.0f}s ({l.get('size', 0) / 1e6 / max(dt, 1e-6):.1f} MB/s)", flush=True)

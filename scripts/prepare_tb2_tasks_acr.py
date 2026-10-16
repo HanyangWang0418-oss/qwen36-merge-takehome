@@ -31,7 +31,7 @@ for t in m["task_ids"]:
     shutil.copytree(s, d, ignore=shutil.ignore_patterns(".git"))
     toml = d / "task.toml"
     old = toml.read_text()
-    ref = f"{acr}/{t}:{c8}"
+    ref = f"{acr}/tb2-{t}:{c8}"
     if re.search(r"^\s*docker_image\s*=", old, re.M):
         new = re.sub(r'^(\s*docker_image\s*=\s*)"[^"]*"', rf'\1"{ref}"', old, count=1, flags=re.M)
     else:

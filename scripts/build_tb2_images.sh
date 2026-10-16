@@ -28,7 +28,7 @@ build_one() {
   t=$1; d="$SRC/$t/environment"
   if [ ! -f "$d/Dockerfile" ]; then echo "SKIP  $t (no environment/Dockerfile)"; echo "$t" >> logs/images/tb2_no_dockerfile.txt; return 0; fi
   if ls "$d"/docker-compose.y*ml >/dev/null 2>&1; then echo "COMPOSE $t (multi-container, handled separately)"; echo "$t" >> logs/images/tb2_compose.txt; fi
-  img="$ACR_REGISTRY/$t"
+  img="$ACR_REGISTRY/tb2-$t"
   if docker buildx imagetools inspect "$img:${COMMIT:0:8}" >/dev/null 2>&1; then echo "skip  $t (already pushed)"; return 0; fi
   echo "build $t"
   docker buildx build --platform linux/amd64 --provenance=false \
