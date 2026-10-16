@@ -51,7 +51,7 @@ def plot_run(run_dir: Path) -> None:
         ax.annotate(f"selected ckpt step {best['step']}", (best["step"], best["dev_loss"]), fontsize=7, xytext=(5, 5), textcoords="offset points")
     ax.set_xlabel("optimizer step")
     ax.set_ylabel("token-weighted cross-entropy (assistant tokens)")
-    sel = meta.get("selected_checkpoint", "")
+    sel = (meta.get("selected_checkpoint") or "").split("/")[-1]  # basename; full tinker path is in metadata.json
     note = "  (resumed from state checkpoint after a lost session)" if resumed else ""
     ax.set_title(f"{run_dir.name}  base={meta.get('config', {}).get('base', {}).get('tinker_model', '?')}{note}\nselected={sel}", fontsize=8)
     ax.legend(fontsize=8)
