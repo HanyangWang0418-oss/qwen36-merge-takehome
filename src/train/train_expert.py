@@ -45,6 +45,23 @@ def make_run_id(cfg: dict) -> str:
     )
 
 
+def stratified_subsample(rows: list[dict], n: int | None, seed: int) -> list[dict]:
+    """Deterministic subsample keeping the difficulty-tier proportions (meta.tier); no-op if n >= len."""
+    if not n or n >= len(rows):
+        return rows
+    rng = random.Random(seed)
+    by_tier: dict[str, list[dict]] = {}
+    for r in rows:
+        by_tier.setdefault(r.get("meta", {}).get("tier", "all"), []).append(r)
+    out = []
+    for tier, group in sorted(by_tier.items()):
+        rng.shuffle(group)
+        out += group[: round(n * len(group) / len(rows))]
+    rng.shuffle(out)
+    print(f"stratified subsample: {len(out)} of {len(rows)} ({ {t: len(g) for t, g in by_tier.items()} })")
+    return out
+
+
 def tokenize_split(tokenizer, rows: list[dict], max_len: int, loss_on_assistant_only: bool) -> list[dict]:
     """Returns list of {"tokens": [...], "weights": [...]} with weight 1 on assistant tokens."""
     out, dropped = [], 0
@@ -97,6 +114,9 @@ def main() -> int:
 
     train_rows = load_jsonl(ROOT / cfg["data"]["train_file"])
     dev_rows = load_jsonl(ROOT / cfg["data"]["dev_file"])
+    train_rows = stratified_subsample(train_rows, cfg["optim"].get("n_train_examples"), cfg["seed"])
+    if cfg["data"].get("dev_size") and len(dev_rows) > cfg["data"]["dev_size"]:
+        dev_rows = stratified_subsample(dev_rows, cfg["data"]["dev_size"], cfg["seed"])
     if args.limit:
         train_rows, dev_rows = train_rows[: args.limit], dev_rows[: max(8, args.limit // 10)]
     assistant_only = cfg["data"]["loss_on"] == "assistant_only"

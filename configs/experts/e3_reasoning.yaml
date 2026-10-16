@@ -28,7 +28,7 @@ optim:
   weight_decay: 0.0
   batch_size_examples: 32
   max_seq_len: 32768
-  n_train_examples: 20000
+  n_train_examples: 4831                 # stratified 1/3 of the 14,493 built examples (tier proportions kept, seed 42)
   epochs: 1                              # 155M train tokens per epoch; one pass keeps e3 within budget (Tinker $1.18/M)
   max_steps: null                        # derived: ceil(n_train_examples * epochs / batch_size_examples)
   grad_clip: 1.0
@@ -36,14 +36,14 @@ optim:
 data:
   train_file: data/processed/e3_reasoning_train.jsonl
   dev_file: data/processed/e3_reasoning_dev.jsonl   # independent dev split, used for checkpoint selection
-  dev_size: 500
+  dev_size: 200
   loss_on: assistant_only
 
 checkpointing:
-  save_every_steps: 100
+  save_every_steps: 50
   keep: all
   select_by: dev_loss_min                # never by benchmark score
   export: peft_adapter                   # weights.build_lora_adapter -> models/weights/e3_reasoning/
 
 seed: 42
-run_id: null                             # set at launch: ${expert_name}_r${rank}_s${seed}_${date}
+run_id: e3_reasoning_r32_s42_third       # supersedes e3_reasoning_r32_s42_20261016_aborted_full (full-data run stopped at step ~50)
