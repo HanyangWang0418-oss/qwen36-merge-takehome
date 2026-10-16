@@ -75,8 +75,8 @@ def main() -> int:
         cost = sum(float(c["total_cost_usd"]) for c in fr if c and c["total_cost_usd"])
         row.append(f"${cost:.0f}" if cost else "")
         rows.append(row); labels.append(content.get("model_labels", {}).get(m, m))
-    cols = [n for _, n in BENCH] + ["宏平均", "Δ vs Base [95% CI]", "运行失败率(最高项)", "评测成本"]
-    ax = fig.add_axes([0.04, y - 0.03 - 0.028 * len(rows), 0.92, 0.028 * len(rows) + 0.03]); ax.axis("off")
+    cols = ["SWE-bench Pro\nv2-hard", "Terminal-\nBench 2.0", "HLE\n(text-only)", "ASI-Bench\n(B3)", "宏平均", "Δ vs Base\n[95% CI]", "运行失败率\n(最高项)", "评测成本"]
+    ax = fig.add_axes([0.17, y - 0.03 - 0.028 * len(rows), 0.80, 0.028 * len(rows) + 0.03]); ax.axis("off")
     t = ax.table(cellText=rows, rowLabels=labels, colLabels=cols, loc="center", cellLoc="center")
     t.auto_set_font_size(False); t.set_fontsize(6.6); t.scale(1, 1.25)
     y = y - 0.04 - 0.028 * len(rows)

@@ -1,0 +1,134 @@
+name: publish-experts-and-merge
+# Stage 1 (publish): push each expert's selected Tinker sampler checkpoint to the Hugging Face Hub as a
+#   public PEFT adapter (`tinker checkpoint push-hf`), runs on GitHub's network (Tinker/HF are fast there).
+# Stage 2 (merge): download the three adapters from HF, run the merge recipes in configs/merge/, upload each
+#   merged adapter to HF, and commit data/manifests/hf_models.json + merge_recipe.json copies back to main.
+# Secrets: TINKER_API_KEY, HF_TOKEN (write). Vars: HF_USER (default ssyhw7).
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "publish | merge | all"
+        required: true
+        default: "all"
+      merge_configs:
+        description: "space-separated configs/merge/*.yaml names (empty = ta_l0.7 ties_d0.2)"
+        required: false
+        default: "ta_l0.7 ties_d0.2"
+env:
+  HF_USER: ${{ vars.HF_USER || 'ssyhw7' }}
+jobs:
+  publish:
+    if: ${{ github.event.inputs.stage == 'publish' || github.event.inputs.stage == 'all' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - expert: e1_code_repair
+            run: e1_code_repair_r32_s42_20261016
+          - expert: e2_terminal_agent
+            run: e2_terminal_agent_r32_s42_20261016
+          - expert: e3_reasoning
+            run: e3_reasoning_r32_s42_third
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: push selected checkpoint to HF
+        env:
+          TINKER_API_KEY: ${{ secrets.TINKER_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HUGGING_FACE_HUB_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          set -euo pipefail
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          CKPT=$(python3 -c "import json;print(json.load(open('logs/${{ matrix.run }}/metadata.json'))['selected_checkpoint'])")
+          REPO="$HF_USER/qwen36-35b-${{ matrix.expert }}"
+          echo "pushing $CKPT -> $REPO"
+          cd "$RUNNER_TEMP"
+          uvx --from tinker tinker checkpoint push-hf "$CKPT" --repo "$REPO" --public --commit-message "expert ${{ matrix.expert }} from $CKPT" 2>&1 | tail -20
+          uvx --from huggingface_hub[cli] hf download "$REPO" adapter_config.json --local-dir "$RUNNER_TEMP/cfg" >/dev/null
+          python3 - <<PY
+          import json; c=json.load(open("$RUNNER_TEMP/cfg/adapter_config.json"))
+          print(json.dumps({k:c.get(k) for k in ("r","lora_alpha","target_modules","base_model_name_or_path","peft_type")}, indent=1)[:3000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adapter_config_${{ matrix.expert }}
+          path: ${{ runner.temp }}/cfg/adapter_config.json
+  merge:
+    if: ${{ always() && (github.event.inputs.stage == 'merge' || github.event.inputs.stage == 'all') && (needs.publish.result == 'success' || needs.publish.result == 'skipped') }}
+    needs: [publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: free disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup || true
+          sudo mkdir -p /mnt/work && sudo chown "$USER" /mnt/work; df -h / /mnt | tail -2
+      - name: deps (torch cpu)
+        run: |
+          uv venv /mnt/work/venv --python 3.11
+          . /mnt/work/venv/bin/activate
+          uv pip install --index-url https://download.pytorch.org/whl/cpu torch
+          uv pip install safetensors pyyaml "huggingface_hub[cli]" numpy
+      - name: download expert adapters from HF
+        env: { HF_TOKEN: "${{ secrets.HF_TOKEN }}" }
+        run: |
+          . /mnt/work/venv/bin/activate
+          for e in e1_code_repair e2_terminal_agent e3_reasoning; do
+            hf download "$HF_USER/qwen36-35b-$e" --local-dir "/mnt/work/models/weights/$e" --include "adapter_config.json" --include "adapter_model*.safetensors" >/dev/null
+            ls -la "/mnt/work/models/weights/$e" | tail -3
+          done
+          df -h /mnt | tail -1
+      - name: merge + upload
+        env: { HF_TOKEN: "${{ secrets.HF_TOKEN }}" }
+        run: |
+          set -euo pipefail
+          . /mnt/work/venv/bin/activate
+          mkdir -p models/weights && ln -sfn /mnt/work/models/weights/e1_code_repair models/weights/e1_code_repair \
+            && ln -sfn /mnt/work/models/weights/e2_terminal_agent models/weights/e2_terminal_agent \
+            && ln -sfn /mnt/work/models/weights/e3_reasoning models/weights/e3_reasoning
+          mkdir -p data/manifests/merge_recipes
+          for cfg in ${{ github.event.inputs.merge_configs || 'ta_l0.7 ties_d0.2' }}; do
+            out="/mnt/work/models/weights/merged_$cfg"
+            echo "=== merging $cfg"
+            python src/merge/merge_adapters.py "configs/merge/$cfg.yaml" --out "$out" 2>&1 | tail -8
+            cp "$out/merge_recipe.json" "data/manifests/merge_recipes/merged_$cfg.json"
+            REPO="$HF_USER/qwen36-35b-merged-$cfg"
+            python - "$out" "$REPO" <<'PY'
+          import sys, os, json
+          from huggingface_hub import HfApi
+          d, repo = sys.argv[1], sys.argv[2]
+          api = HfApi(token=os.environ["HF_TOKEN"]); api.create_repo(repo, private=False, exist_ok=True)
+          rec = json.load(open(f"{d}/merge_recipe.json"))
+          open(f"{d}/README.md","w").write(f"---\nlicense: apache-2.0\nbase_model: Qwen/Qwen3.6-35B-A3B\nbase_model_relation: merge\nlibrary_name: peft\ntags: [lora, merge, {rec['method']}, qwen3.6]\n---\n# {repo.split('/')[-1]}\n\nMerged LoRA adapter ({rec['method']}, out_rank {rec['out_rank']}) of three experts on Qwen/Qwen3.6-35B-A3B. Full recipe in merge_recipe.json; code, data and evaluation in https://github.com/HanyangWang0418-oss/qwen36-merge-takehome. Model card to be completed with results.\n")
+          api.upload_folder(folder_path=d, repo_id=repo, commit_message=f"merged adapter {rec['method']}")
+          sha = api.model_info(repo).sha
+          p = "data/manifests/hf_models.json"; m = json.load(open(p)) if os.path.exists(p) else {}
+          m[os.path.basename(d)] = {"repo_id": repo, "revision": sha, "url": f"https://huggingface.co/{repo}", "method": rec["method"]}
+          json.dump(m, open(p, "w"), indent=2); print("uploaded", repo, sha)
+          PY
+            rm -rf "$out"; df -h /mnt | tail -1
+          done
+          # record expert repos too
+          python - <<'PY'
+          import json, os
+          from huggingface_hub import HfApi
+          api = HfApi(token=os.environ["HF_TOKEN"]); p = "data/manifests/hf_models.json"; m = json.load(open(p)) if os.path.exists(p) else {}
+          for e in ["e1_code_repair","e2_terminal_agent","e3_reasoning"]:
+              repo = f"{os.environ['HF_USER']}/qwen36-35b-{e}"
+              try: m[e] = {"repo_id": repo, "revision": api.model_info(repo).sha, "url": f"https://huggingface.co/{repo}"}
+              except Exception as ex: m[e] = {"repo_id": repo, "error": str(ex)[:200]}
+          json.dump(m, open(p, "w"), indent=2); print(json.dumps(m, indent=1))
+          PY
+      - name: commit manifests
+        run: |
+          git config user.name "github-actions[bot]"; git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/manifests/hf_models.json data/manifests/merge_recipes
+          git commit -m "Merged adapters + HF model manifest (Actions run ${{ github.run_id }})" || echo "nothing to commit"
+          git push

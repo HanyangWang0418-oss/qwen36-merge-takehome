@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-"""Download a Tinker sampler checkpoint and export it as a PEFT adapter.
+"""Download a Tinker sampler checkpoint and export it as a PEFT adapter (tinker_cookbook.weights).
+Alternative with no local download: `tinker checkpoint push-hf <tinker path> --repo <hf repo>` pushes the
+PEFT adapter to the Hub from Tinker's side.
 
     uv run python src/train/export_adapter.py tinker://<run>/sampler_weights/<step> models/weights/e1_code_repair
 
@@ -19,7 +21,7 @@ from pathlib import Path
 def main() -> int:
     tinker_path, out = sys.argv[1], Path(sys.argv[2])
     base = sys.argv[3] if len(sys.argv) > 3 else "Qwen/Qwen3.6-35B-A3B"
-    from tinker import weights
+    from tinker_cookbook import weights  # pip install tinker-cookbook (needs torch); not in the laptop venv
 
     with tempfile.TemporaryDirectory() as tmp:
         weights.download(tinker_path=tinker_path, output_dir=tmp)
