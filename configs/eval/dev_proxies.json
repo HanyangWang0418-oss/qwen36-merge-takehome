@@ -1,0 +1,74 @@
+{
+  "seed": 20261017,
+  "purpose": "merge-ablation screening only; independent of the four evaluation benchmarks",
+  "hle_proxy": {
+    "dataset": "TIGER-Lab/MMLU-Pro test (STEM categories, <=45 per category)",
+    "n": 300,
+    "file": "configs/eval/dev_proxy_hle_mmlu_pro.jsonl",
+    "metric": "exact-match answer letter",
+    "hle_13gram_overlap_dropped": 0,
+    "per_category": {
+      "physics": 45,
+      "health": 45,
+      "chemistry": 45,
+      "engineering": 45,
+      "math": 45,
+      "computer science": 30,
+      "biology": 45
+    }
+  },
+  "swebench_proxy": {
+    "dataset": "harbor swebench-verified@1.0",
+    "tasks": [
+      "astropy__astropy-14995",
+      "django__django-11820",
+      "django__django-13023",
+      "django__django-14122",
+      "django__django-16315",
+      "django__django-17029",
+      "matplotlib__matplotlib-24026",
+      "matplotlib__matplotlib-24149",
+      "matplotlib__matplotlib-24627",
+      "matplotlib__matplotlib-26291",
+      "pytest-dev__pytest-6202",
+      "sphinx-doc__sphinx-10614",
+      "sphinx-doc__sphinx-8551",
+      "sympy__sympy-16766",
+      "sympy__sympy-21379"
+    ],
+    "metric": "resolved rate"
+  },
+  "terminal_bench_proxy": {
+    "dataset": "harbor terminal-bench-pro@1.0",
+    "tasks": [
+      "advanced-poker-hand-classifier",
+      "cache-bert-model-offline",
+      "configure-apache-logging-and-rate-limit",
+      "count-claude-tokens-medical-papers",
+      "create-valid-message-enc-file",
+      "debug-bst-segfault-with-gdb",
+      "fix-django-command-injection",
+      "flood-escape-path-planner",
+      "go-board-legal-move-capture-analysis",
+      "go-board-move-recommendation",
+      "implement-sprt-ab-test-analyzer",
+      "merge-parser-branches",
+      "normalize-invoice-pdfs-to-csv",
+      "polyglot-bash-python-config-validator",
+      "python-jacobi-eigen-solver-conversion",
+      "python-pcap-anomaly-detector",
+      "python-sql-injection-sanitizer",
+      "recover-encrypted-db-credentials",
+      "solve-escape-room-puzzle-server",
+      "train-matrix-factorization-embeddings"
+    ],
+    "runs": 1,
+    "metric": "success rate"
+  },
+  "asi_proxy": {
+    "dataset": "Apexintelligence-AI/ASI-Bench-seed31415",
+    "n_instances": 12,
+    "selection": "first 12 instance ids in sorted order (seed31415 is the public track)",
+    "metric": "B3 mean final_score (local scoring)"
+  }
+}

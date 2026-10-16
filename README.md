@@ -37,7 +37,7 @@ Why 35B and not 7B: training runs on Tinker (managed LoRA; MoE expert matrices a
 | e3_reasoning | – | – | full | – |
 | merged_ta_l0.7 (main) | full | full (5 seeds) | full | full |
 | merged_ties_d0.2 | full | full (5 seeds) | full | full |
-| other merge ablations | dev-subset screening only, disclosed as such | | | |
+| other merge ablations | screened on independent dev proxies only (`configs/eval/dev_proxies.json`: MMLU-Pro STEM, SWE-bench Verified sample, Terminal-Bench-Pro sample, ASI seed31415), never on the four benchmarks | | | |
 
 Experts are evaluated on their own benchmark only (compute). Cells marked "–" are not claimed.
 
@@ -107,7 +107,7 @@ See `models/README.md`. (Links filled after upload.)
 - HLE is evaluated text-only; no multimodal number is claimed.
 - ASI-Bench track (seed42 official vs seed31415 local) depends on interviewer confirmation; recorded in the manifest.
 - Tinker does not expose GPU type; training cost is reported in tokens and dollars, GPU-hours only for the serving box.
-- Merge ablations beyond the two main recipes are screened on a dev subset, not the full task set.
+- Merge ablations beyond the two main recipes are screened on independent proxy sets (`configs/eval/dev_proxies.json`), not on the benchmarks; proxy numbers are never reported as benchmark results.
 
 ## Results
 
