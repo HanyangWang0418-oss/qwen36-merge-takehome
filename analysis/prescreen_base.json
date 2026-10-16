@@ -1,0 +1,1014 @@
+{
+ "summary": {
+  "model": "Qwen/Qwen3.6-35B-A3B",
+  "n": 100,
+  "accuracy": 0.66,
+  "errors": 0,
+  "truncated": 27,
+  "output_tokens": 424130,
+  "est_cost_usd": 0.56621355,
+  "seconds": 166
+ },
+ "rows": [
+  {
+   "id": 9930,
+   "category": "physics",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 955,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9660,
+   "category": "physics",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 3282,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6613,
+   "category": "health",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 953,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4281,
+   "category": "chemistry",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 5839,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4494,
+   "category": "chemistry",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 4054,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 11988,
+   "category": "engineering",
+   "gold": "A",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 8008,
+   "category": "math",
+   "gold": "B",
+   "pred": "C",
+   "correct": false,
+   "n_tokens": 6038,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6638,
+   "category": "health",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 1080,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 12250,
+   "category": "engineering",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 2885,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9407,
+   "category": "physics",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 1182,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8240,
+   "category": "math",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 603,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9556,
+   "category": "physics",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 3786,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3854,
+   "category": "chemistry",
+   "gold": "D",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 4635,
+   "category": "chemistry",
+   "gold": "J",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 4190,
+   "category": "chemistry",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 1495,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10482,
+   "category": "computer science",
+   "gold": "D",
+   "pred": "D",
+   "correct": true,
+   "n_tokens": 868,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9339,
+   "category": "physics",
+   "gold": "F",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 8740,
+   "category": "math",
+   "gold": "F",
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 4948,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3043,
+   "category": "biology",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 1435,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4477,
+   "category": "chemistry",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 2044,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3921,
+   "category": "chemistry",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 1142,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4191,
+   "category": "chemistry",
+   "gold": "F",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 11882,
+   "category": "engineering",
+   "gold": "A",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 6326,
+   "category": "health",
+   "gold": "G",
+   "pred": "C",
+   "correct": false,
+   "n_tokens": 2107,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3111,
+   "category": "biology",
+   "gold": "D",
+   "pred": "D",
+   "correct": true,
+   "n_tokens": 1903,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4254,
+   "category": "chemistry",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 4096,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9388,
+   "category": "physics",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 1939,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8534,
+   "category": "math",
+   "gold": "G",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 4401,
+   "category": "chemistry",
+   "gold": "I",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3294,
+   "category": "biology",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 1481,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6682,
+   "category": "health",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 3663,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4087,
+   "category": "chemistry",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 1432,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6721,
+   "category": "health",
+   "gold": "I",
+   "pred": "E",
+   "correct": false,
+   "n_tokens": 2881,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3467,
+   "category": "biology",
+   "gold": "D",
+   "pred": "D",
+   "correct": true,
+   "n_tokens": 3164,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10002,
+   "category": "physics",
+   "gold": "G",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 8284,
+   "category": "math",
+   "gold": "H",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 2953,
+   "category": "biology",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 2234,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 2863,
+   "category": "biology",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 667,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 11902,
+   "category": "engineering",
+   "gold": "F",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 4549,
+   "category": "chemistry",
+   "gold": "B",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 8672,
+   "category": "math",
+   "gold": "E",
+   "pred": "I",
+   "correct": false,
+   "n_tokens": 2130,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 11500,
+   "category": "engineering",
+   "gold": "A",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3120,
+   "category": "biology",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 3456,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8860,
+   "category": "math",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 2094,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10151,
+   "category": "physics",
+   "gold": "D",
+   "pred": "D",
+   "correct": true,
+   "n_tokens": 4846,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 11318,
+   "category": "engineering",
+   "gold": "D",
+   "pred": "D",
+   "correct": true,
+   "n_tokens": 6785,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6697,
+   "category": "health",
+   "gold": "F",
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 1530,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9010,
+   "category": "math",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 996,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4647,
+   "category": "chemistry",
+   "gold": "J",
+   "pred": "G",
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3987,
+   "category": "chemistry",
+   "gold": "C",
+   "pred": "C",
+   "correct": true,
+   "n_tokens": 4401,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9007,
+   "category": "math",
+   "gold": "C",
+   "pred": "C",
+   "correct": true,
+   "n_tokens": 1955,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 2940,
+   "category": "biology",
+   "gold": "C",
+   "pred": "C",
+   "correct": true,
+   "n_tokens": 3711,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10408,
+   "category": "computer science",
+   "gold": "C",
+   "pred": "C",
+   "correct": true,
+   "n_tokens": 1079,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9905,
+   "category": "physics",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 1534,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10465,
+   "category": "computer science",
+   "gold": "E",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3030,
+   "category": "biology",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 2700,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6212,
+   "category": "health",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 1080,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9561,
+   "category": "physics",
+   "gold": "F",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3328,
+   "category": "biology",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 561,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8545,
+   "category": "math",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 7402,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6203,
+   "category": "health",
+   "gold": "D",
+   "pred": "I",
+   "correct": false,
+   "n_tokens": 4150,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3158,
+   "category": "biology",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 1575,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6229,
+   "category": "health",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 1807,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 11979,
+   "category": "engineering",
+   "gold": "E",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 6644,
+   "category": "health",
+   "gold": "E",
+   "pred": "I",
+   "correct": false,
+   "n_tokens": 1609,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8408,
+   "category": "math",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 2273,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8043,
+   "category": "math",
+   "gold": "I",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 9756,
+   "category": "physics",
+   "gold": "D",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 6661,
+   "category": "health",
+   "gold": "F",
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 1242,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10161,
+   "category": "physics",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 4549,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3510,
+   "category": "biology",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 1183,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9742,
+   "category": "physics",
+   "gold": "J",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3492,
+   "category": "biology",
+   "gold": "F",
+   "pred": "E",
+   "correct": false,
+   "n_tokens": 1953,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9826,
+   "category": "physics",
+   "gold": "G",
+   "pred": "G",
+   "correct": true,
+   "n_tokens": 1213,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9616,
+   "category": "physics",
+   "gold": "H",
+   "pred": "H",
+   "correct": true,
+   "n_tokens": 5874,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8269,
+   "category": "math",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 6504,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4402,
+   "category": "chemistry",
+   "gold": "C",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3993,
+   "category": "chemistry",
+   "gold": "J",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 11661,
+   "category": "engineering",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 7131,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4316,
+   "category": "chemistry",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 952,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 4257,
+   "category": "chemistry",
+   "gold": "F",
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 8092,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3109,
+   "category": "biology",
+   "gold": "D",
+   "pred": "I",
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 6102,
+   "category": "health",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 2163,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9707,
+   "category": "physics",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 4350,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3383,
+   "category": "biology",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 1796,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3957,
+   "category": "chemistry",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 5667,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9614,
+   "category": "physics",
+   "gold": "E",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 10371,
+   "category": "computer science",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 1873,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 7971,
+   "category": "math",
+   "gold": "C",
+   "pred": "H",
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 9656,
+   "category": "physics",
+   "gold": "J",
+   "pred": "J",
+   "correct": true,
+   "n_tokens": 5240,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 7980,
+   "category": "math",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 7698,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 9402,
+   "category": "physics",
+   "gold": "F",
+   "pred": "F",
+   "correct": true,
+   "n_tokens": 3260,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 8573,
+   "category": "math",
+   "gold": "H",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 8558,
+   "category": "math",
+   "gold": "A",
+   "pred": "A",
+   "correct": true,
+   "n_tokens": 332,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 10602,
+   "category": "computer science",
+   "gold": "C",
+   "pred": "C",
+   "correct": true,
+   "n_tokens": 2923,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 2870,
+   "category": "biology",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 1405,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 12231,
+   "category": "engineering",
+   "gold": "I",
+   "pred": null,
+   "correct": false,
+   "n_tokens": 8192,
+   "truncated": true,
+   "status": "ok"
+  },
+  {
+   "id": 3121,
+   "category": "biology",
+   "gold": "B",
+   "pred": "B",
+   "correct": true,
+   "n_tokens": 600,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 3456,
+   "category": "biology",
+   "gold": "E",
+   "pred": "E",
+   "correct": true,
+   "n_tokens": 581,
+   "truncated": false,
+   "status": "ok"
+  },
+  {
+   "id": 6539,
+   "category": "health",
+   "gold": "I",
+   "pred": "I",
+   "correct": true,
+   "n_tokens": 535,
+   "truncated": false,
+   "status": "ok"
+  }
+ ]
+}
