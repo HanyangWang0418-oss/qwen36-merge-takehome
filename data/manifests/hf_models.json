@@ -2,38 +2,17 @@
   "e1_code_repair": {
     "repo_id": "ssyhw7/qwen36-35b-e1_code_repair",
     "revision": "ef22030e8362b21b2fe5b9f6fb0e6a3932fb184c",
-    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e1_code_repair",
-    "private": false,
-    "files": [
-      ".gitattributes",
-      "README.md",
-      "adapter_config.json",
-      "adapter_model.safetensors"
-    ]
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e1_code_repair"
   },
   "e2_terminal_agent": {
     "repo_id": "ssyhw7/qwen36-35b-e2_terminal_agent",
     "revision": "753874a1d02bef38dd15e37a213cb4a27c3cbc7e",
-    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2_terminal_agent",
-    "private": false,
-    "files": [
-      ".gitattributes",
-      "README.md",
-      "adapter_config.json",
-      "adapter_model.safetensors"
-    ]
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2_terminal_agent"
   },
   "e3_reasoning": {
     "repo_id": "ssyhw7/qwen36-35b-e3_reasoning",
     "revision": "61822c67d804818142f30afdceb9b957669bbe20",
-    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e3_reasoning",
-    "private": false,
-    "files": [
-      ".gitattributes",
-      "README.md",
-      "adapter_config.json",
-      "adapter_model.safetensors"
-    ]
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e3_reasoning"
   },
   "merged_ta_l0.7": {
     "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.7",
@@ -44,5 +23,11 @@
     "out_rank": 96,
     "adapter_bytes": 6737682760,
     "private": false
+  },
+  "merged_ties_d0.2": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ties_d0.2",
+    "revision": "d9ce9d15a9ec5a6de5acc0f7b0cb8682ff862aa5",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ties_d0.2",
+    "method": "ties"
   }
 }
