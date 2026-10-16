@@ -15,8 +15,8 @@ Methods (configs/merge/*.yaml):
                     (keeps the broadcast layout; rank = sum of ranks)
   ties            : trim to top-`density` magnitude per expert adapter, sign election by summed
                     magnitude, disjoint mean of agreeing entries (Yadav et al. 2023); re-expressed
-                    by truncated SVD to `out_rank` per (module, expert); for 3D modules the result is
-                    stored per expert on both sides ([E, r, in] / [E, out, r]), so the adapter grows
+                    by truncated SVD to `out_rank`; for 3D modules a single joint SVD over the experts
+                    stacked along the non-shared side keeps the exported shared-side layout and size
   dare_ties / dare_ta : Bernoulli-drop with p = 1-density, rescale by 1/density, then ties / sum
 Per-expert `layers` (e.g. "20-39") restricts an expert adapter to a layer range (layer-scope ablation).
 Output dtype follows the inputs (Tinker exports fp32). SVD relative errors are logged per module.
@@ -177,19 +177,33 @@ def main() -> int:
         else:
             lams = [a.lam for a in contrib]
             if is3d:
+                # Merge every expert's dense delta, then take ONE joint low-rank factorisation that keeps the
+                # exported layout (shared A for w1/w3, shared B for w2): the best rank-r approximation of the
+                # experts stacked along the non-shared side. Memory ~ E*out*in*4 bytes per module (~1 GB).
                 E = max(a0.shape[0], b0.shape[0])
-                A_list, B_list, errs = [], [], []
+                shared_A = a0.shape[0] == 1
+                abs_ = [a.ab(m) for a in contrib]
+                D_all = []
                 for e in range(E):
-                    deltas = [expert_delta(*a.ab(m), e, a.scale) for a in contrib]
+                    deltas = [expert_delta(A_, B_, e, a.scale) for (A_, B_), a in zip(abs_, contrib)]
                     if method.startswith("dare"):
                         deltas = [dare(d, density, gen) for d in deltas]
                     D = ties(deltas, lams, density if method == "ties" else 1.0) if method in ("ties", "dare_ties") else sum(l * d for l, d in zip(lams, deltas))
-                    Ae, Be, ee = svd_lowrank(D, out_rank)
-                    A_list.append(Ae); B_list.append(Be); errs.append(ee)
-                A_m = torch.stack(A_list)      # [E, r, in]
-                B_m = torch.stack(B_list)      # [E, out, r]
-                r_out = out_rank
-                err = float(sum(errs) / len(errs))
+                    D_all.append(D)
+                D_all = torch.stack(D_all)                      # [E, out, in]
+                out_dim, in_dim = D_all.shape[1], D_all.shape[2]
+                if shared_A:
+                    Mx = D_all.reshape(E * out_dim, in_dim)     # rows: experts x out
+                    A2, B2, err = svd_lowrank(Mx, out_rank)     # A2 [r,in], B2 [E*out, r]
+                    A_m = A2.unsqueeze(0)                        # [1, r, in]
+                    B_m = B2.reshape(E, out_dim, -1)             # [E, out, r]
+                else:
+                    Mx = D_all.permute(1, 0, 2).reshape(out_dim, E * in_dim)  # cols: experts x in
+                    A2, B2, err = svd_lowrank(Mx, out_rank)     # A2 [r, E*in], B2 [out, r]
+                    A_m = A2.reshape(-1, E, in_dim).permute(1, 0, 2).contiguous()  # [E, r, in]
+                    B_m = B2.unsqueeze(0)                        # [1, out, r]
+                r_out = A_m.shape[1]
+                del D_all, Mx
             else:
                 deltas = [a.scale * (a.ab(m)[1].float() @ a.ab(m)[0].float()) for a in contrib]
                 if method.startswith("dare"):
@@ -259,7 +273,7 @@ def main() -> int:
             "dare_ties": "random drop + rescale before TIES sign election",
             "dare_ta": "random drop + rescale, then additive",
         }[method],
-        "layout_note": "3D MoE modules: task_arithmetic keeps the shared-side broadcast layout; SVD-based methods store per-expert A and B",
+        "layout_note": "3D MoE modules: task_arithmetic concatenates on the rank axis; SVD-based methods use one joint SVD over stacked experts, both keep the shared-side broadcast layout",
     }
     (out / "merge_recipe.json").write_text(json.dumps(recipe, indent=2))
     print(json.dumps({k: recipe[k] for k in ("method", "out_rank", "n_modules_merged", "n_modules_3d", "svd_rel_error")}, indent=2))

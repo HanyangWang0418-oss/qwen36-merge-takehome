@@ -34,5 +34,15 @@
       "adapter_config.json",
       "adapter_model.safetensors"
     ]
+  },
+  "merged_ta_l0.7": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.7",
+    "revision": "d8da199b6ed6fa6a0a6dadd418692d210e0614e4",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7",
+    "method": "task_arithmetic",
+    "lambda": 0.7,
+    "out_rank": 96,
+    "adapter_bytes": 6737682760,
+    "private": false
   }
 }
