@@ -28,6 +28,13 @@ def plot_run(run_dir: Path) -> None:
     rows = [json.loads(l) for l in (run_dir / "metrics.jsonl").open() if l.strip()]
     if not rows:
         return
+    # A resumed run re-logs steps after the resume point; keep the last record per step
+    # (the earlier ones belong to the lost session) and note it on the plot.
+    by_step = {}
+    for r in rows:
+        by_step[r["step"]] = r
+    resumed = len(by_step) != len(rows)
+    rows = [by_step[k] for k in sorted(by_step)]
     meta = json.loads((run_dir / "metadata.json").read_text()) if (run_dir / "metadata.json").exists() else {}
     with (SRC / f"{run_dir.name}_loss.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["step", "train_loss", "dev_loss", "lr", "checkpoint"])
@@ -45,7 +52,8 @@ def plot_run(run_dir: Path) -> None:
     ax.set_xlabel("optimizer step")
     ax.set_ylabel("token-weighted cross-entropy (assistant tokens)")
     sel = meta.get("selected_checkpoint", "")
-    ax.set_title(f"{run_dir.name}  base={meta.get('config', {}).get('base', {}).get('tinker_model', '?')}\nselected={sel}", fontsize=8)
+    note = "  (resumed from state checkpoint after a lost session)" if resumed else ""
+    ax.set_title(f"{run_dir.name}  base={meta.get('config', {}).get('base', {}).get('tinker_model', '?')}{note}\nselected={sel}", fontsize=8)
     ax.legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / f"{run_dir.name}_loss.png", dpi=150)
