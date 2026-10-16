@@ -1,0 +1,18 @@
+{
+  "started": "2026-10-16T22:49:57",
+  "A": {
+    "image": "ghcr.io/scaleapi/swe-bench_pro-v2:instance_NodeBB__NodeBB-8168c6c40707478f71b8af60300830fe554c778c-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+    "error": "BuildException('template build error: envd inject failed: builder failed: registry credentials are required')",
+    "trace": "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/scripts/probe_sandbox_templates.py\", line 21, in build\n    res = Template.build(tpl, alias=alias, cpu_count=cpu, memory_mb=mem)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/e2b/template_sync/main.py\", line 276, in build\n    wait_for_build_finish(\n  File \"/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/e2b/template_sync/build_api.py\", line 295, in wait_for_build_finish\n    raise BuildException(\ne2b.exceptions.BuildException: template build error: envd inject failed: builder failed: registry credentials are required\n"
+  },
+  "B_32c_49152m": {
+    "error": "BuildException('template build error: envd inject failed: invalid image \"debian:bookworm-slim\"')"
+  },
+  "B_16c_32768m": {
+    "error": "BuildException('template build error: envd inject failed: invalid image \"debian:bookworm-slim\"')"
+  },
+  "B_8c_16384m": {
+    "error": "BuildException('template build error: envd inject failed: invalid image \"debian:bookworm-slim\"')"
+  },
+  "finished": "2026-10-16T22:50:07"
+}

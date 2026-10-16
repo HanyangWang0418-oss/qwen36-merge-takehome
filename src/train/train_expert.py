@@ -100,6 +100,8 @@ def main() -> int:
     ap.add_argument("config")
     ap.add_argument("--dry-run", action="store_true", help="tokenize and report sizes, no Tinker calls")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--resume-from", default=None, help="tinker://.../weights/<name> state checkpoint to resume from")
+    ap.add_argument("--start-step", type=int, default=0, help="step count already completed in the checkpoint; the same seeded data order is replayed and skipped")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
@@ -143,6 +145,10 @@ def main() -> int:
         "started_at": datetime.now(timezone.utc).isoformat(),
         "hardware": "Tinker managed cluster (GPU type not exposed by the API)",
     }
+    if args.resume_from and (log_dir / "metadata.json").exists():
+        prev = json.loads((log_dir / "metadata.json").read_text())
+        prev.update({k: v for k, v in metadata.items() if k not in ("started_at",)})
+        metadata = prev
     (log_dir / "metadata.json").write_text(json.dumps(metadata, indent=2))
     print(json.dumps({k: v for k, v in metadata.items() if k != "config"}, indent=2))
     if args.dry_run:
@@ -153,14 +159,23 @@ def main() -> int:
 
     service = tinker.ServiceClient()
     lora_flags = {"train_mlp": True, "train_attn": True, "train_unembed": True, **cfg["lora"].get("tinker_flags", {})}
-    client = service.create_lora_training_client(
-        base_model=cfg["base"]["tinker_model"],
-        rank=cfg["lora"]["rank"],
-        seed=cfg["seed"],
-        user_metadata={"run_id": run_id, "expert": cfg["expert_name"]},
-        **lora_flags,
-    )
+    if args.resume_from:
+        # Resume weights + optimizer state after a lost session; LR schedule and data order continue from start_step.
+        client = service.create_training_client_from_state_with_optimizer(
+            path=args.resume_from, user_metadata={"run_id": run_id, "expert": cfg["expert_name"], "resumed_from": args.resume_from})
+        metadata.setdefault("resumes", []).append({"from": args.resume_from, "start_step": args.start_step,
+                                                   "at": datetime.now(timezone.utc).isoformat()})
+        print(f"resumed from {args.resume_from} at step {args.start_step}")
+    else:
+        client = service.create_lora_training_client(
+            base_model=cfg["base"]["tinker_model"],
+            rank=cfg["lora"]["rank"],
+            seed=cfg["seed"],
+            user_metadata={"run_id": run_id, "expert": cfg["expert_name"]},
+            **lora_flags,
+        )
     metadata["lora_flags"] = lora_flags
+    best_dev_init = [float("inf"), None]
     lr0 = cfg["optim"]["learning_rate"]
     warmup = cfg["optim"]["warmup_steps"]
 
@@ -172,12 +187,20 @@ def main() -> int:
             return lr0 * 0.5 * (1 + math.cos(math.pi * p))
         return lr0
 
+    if args.resume_from and (log_dir / "metrics.jsonl").exists():
+        for line in (log_dir / "metrics.jsonl").open():
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if "dev_loss" in r and r["dev_loss"] < best_dev_init[0]:
+                best_dev_init[0], best_dev_init[1] = r["dev_loss"], r.get("checkpoint")
     metrics = (log_dir / "metrics.jsonl").open("a")
     resources = (log_dir / "resources.csv").open("a")
     resources.write("step,wallclock_s,train_tokens_cum,tokens_per_s\n")
     t0 = time.time()
     tokens_cum = 0
-    best_dev, best_ckpt = float("inf"), None
+    best_dev, best_ckpt = best_dev_init
     order = list(range(len(train)))
 
     def eval_dev() -> float:
@@ -189,11 +212,17 @@ def main() -> int:
         return sum(losses) / len(dev)
 
     step = 0
+    skipped = 0
     while step < max_steps:
         random.shuffle(order)
         for i in range(0, len(order), bs):
             if step >= max_steps:
                 break
+            if step < args.start_step:  # replay the seeded order without training
+                step += 1
+                skipped += 1
+                tokens_cum += sum(len(train[j]["tokens"]) for j in order[i : i + bs])
+                continue
             batch = [train[j] for j in order[i : i + bs]]
             fb = client.forward_backward([to_datum(tinker, e) for e in batch], loss_fn="cross_entropy")
             lr = lr_at(step)
