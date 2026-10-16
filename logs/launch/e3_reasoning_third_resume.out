@@ -1,0 +1,71 @@
+[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
+stratified subsample: 4831 of 14493 ({'hard': 8886, 'easy': 4870, 'medium': 737})
+stratified subsample: 200 of 500 ({'hard': 309, 'easy': 170, 'medium': 21})
+tokenized 4831 examples, dropped 0 over max_seq_len=32768
+tokenized 200 examples, dropped 0 over max_seq_len=32768
+{
+  "run_id": "e3_reasoning_r32_s42_third",
+  "config_path": "configs/experts/e3_reasoning.yaml",
+  "n_train_examples": 4831,
+  "n_dev_examples": 200,
+  "n_train_tokens": 51760501,
+  "n_loss_tokens": 50870818.0,
+  "steps_per_epoch": 151,
+  "max_steps": 151,
+  "launch_command": "src/train/train_expert.py configs/experts/e3_reasoning.yaml --resume-from tinker://7c7bbc51-72a7-52e6-a8b7-30abddc9ddb6:train:0/weights/e3_reasoning_r32_s42_third_step00100 --start-step 100",
+  "started_at": "2026-10-16T10:10:20.843749+00:00",
+  "hardware": "Tinker managed cluster (GPU type not exposed by the API)"
+}
+resumed from tinker://7c7bbc51-72a7-52e6-a8b7-30abddc9ddb6:train:0/weights/e3_reasoning_r32_s42_third_step00100 at step 100
+{"step": 101, "train_loss": 0.7882500534882055, "lr": 3.296160619965056e-05, "wallclock_s": 16.753150939941406, "tokens_cum": 34491976}
+{"step": 102, "train_loss": 0.8176193949233934, "lr": 3.183930044653014e-05, "wallclock_s": 29.898300886154175, "tokens_cum": 34822232}
+{"step": 103, "train_loss": 0.84769965900726, "lr": 3.072743874271376e-05, "wallclock_s": 41.394484996795654, "tokens_cum": 35184510}
+{"step": 104, "train_loss": 0.9285809681352425, "lr": 2.962666050951997e-05, "wallclock_s": 53.271682024002075, "tokens_cum": 35536997}
+{"step": 105, "train_loss": 0.8847127070275473, "lr": 2.853759879426644e-05, "wallclock_s": 66.31230902671814, "tokens_cum": 35947043}
+{"step": 106, "train_loss": 0.9088304716858943, "lr": 2.7460879906210487e-05, "wallclock_s": 79.43290114402771, "tokens_cum": 36315055}
+{"step": 107, "train_loss": 0.8266704183367974, "lr": 2.6397123056364365e-05, "wallclock_s": 91.18520402908325, "tokens_cum": 36630822}
+{"step": 108, "train_loss": 0.8259786809424303, "lr": 2.5346940001392728e-05, "wallclock_s": 102.15393114089966, "tokens_cum": 36924959}
+{"step": 109, "train_loss": 0.9239830791279632, "lr": 2.4310934691797203e-05, "wallclock_s": 113.48580312728882, "tokens_cum": 37275499}
+{"step": 110, "train_loss": 0.8932287844155165, "lr": 2.3289702924589914e-05, "wallclock_s": 124.67091012001038, "tokens_cum": 37593001}
+{"step": 111, "train_loss": 0.9382647565801624, "lr": 2.22838320006563e-05, "wallclock_s": 135.13831496238708, "tokens_cum": 37886504}
+{"step": 112, "train_loss": 0.8866857336760683, "lr": 2.129390038700374e-05, "wallclock_s": 148.2705101966858, "tokens_cum": 38201418}
+{"step": 113, "train_loss": 0.9061504620242742, "lr": 2.0320477384090665e-05, "wallclock_s": 160.0076322555542, "tokens_cum": 38530106}
+{"step": 114, "train_loss": 0.8357235495745563, "lr": 1.936412279842705e-05, "wallclock_s": 171.0946922302246, "tokens_cum": 38853781}
+{"step": 115, "train_loss": 0.9405463525963014, "lr": 1.842538662063496e-05, "wallclock_s": 183.7868332862854, "tokens_cum": 39257638}
+{"step": 116, "train_loss": 0.877825055282731, "lr": 1.7504808709154104e-05, "wallclock_s": 195.36346220970154, "tokens_cum": 39665344}
+{"step": 117, "train_loss": 0.8264301303852901, "lr": 1.6602918479774148e-05, "wallclock_s": 206.2662091255188, "tokens_cum": 40014221}
+{"step": 118, "train_loss": 0.9082499754396713, "lr": 1.5720234601172766e-05, "wallclock_s": 217.52640318870544, "tokens_cum": 40347999}
+{"step": 119, "train_loss": 0.8324653484865595, "lr": 1.485726469663401e-05, "wallclock_s": 230.2498550415039, "tokens_cum": 40694984}
+{"step": 120, "train_loss": 0.8109808934196564, "lr": 1.4014505052118887e-05, "wallclock_s": 241.57815718650818, "tokens_cum": 41068831}
+{"step": 121, "train_loss": 0.8771069729689325, "lr": 1.3192440330856004e-05, "wallclock_s": 254.2805380821228, "tokens_cum": 41501510}
+{"step": 122, "train_loss": 0.8419509812867696, "lr": 1.2391543294616154e-05, "wallclock_s": 266.35718607902527, "tokens_cum": 41882524}
+{"step": 123, "train_loss": 0.8604292162187416, "lr": 1.1612274531831463e-05, "wallclock_s": 277.9423689842224, "tokens_cum": 42230635}
+{"step": 124, "train_loss": 0.9360698776654403, "lr": 1.0855082192715294e-05, "wallclock_s": 290.24349999427795, "tokens_cum": 42592642}
+{"step": 125, "train_loss": 0.8627140426676342, "lr": 1.0120401731535212e-05, "wallclock_s": 304.5913541316986, "tokens_cum": 42981017}
+{"step": 126, "train_loss": 0.7301187931098652, "lr": 9.408655656187282e-06, "wallclock_s": 313.9148910045624, "tokens_cum": 43288309}
+{"step": 127, "train_loss": 0.8447773489432691, "lr": 8.720253285215685e-06, "wallclock_s": 331.1077482700348, "tokens_cum": 43694632}
+{"step": 128, "train_loss": 0.9429763752968641, "lr": 8.0555905124175e-06, "wallclock_s": 344.7837450504303, "tokens_cum": 44102395}
+{"step": 129, "train_loss": 0.9381271843692454, "lr": 7.415049579167782e-06, "wallclock_s": 357.9249930381775, "tokens_cum": 44393469}
+{"step": 130, "train_loss": 0.8626009053757311, "lr": 6.798998854596189e-06, "wallclock_s": 370.03529119491577, "tokens_cum": 44685138}
+{"step": 131, "train_loss": 0.8977006318171161, "lr": 6.207792623741243e-06, "wallclock_s": 383.9531672000885, "tokens_cum": 45038292}
+{"step": 132, "train_loss": 0.962168046035691, "lr": 5.641770883804365e-06, "wallclock_s": 395.3260340690613, "tokens_cum": 45385656}
+{"step": 133, "train_loss": 0.8750629842012054, "lr": 5.101259148620619e-06, "wallclock_s": 406.1791801452637, "tokens_cum": 45725939}
+{"step": 134, "train_loss": 0.9354877146892963, "lr": 4.586568261458729e-06, "wallclock_s": 417.7949712276459, "tokens_cum": 46068995}
+{"step": 135, "train_loss": 0.8995217111113818, "lr": 4.097994216258039e-06, "wallclock_s": 432.4296991825104, "tokens_cum": 46397171}
+{"step": 136, "train_loss": 0.9118399969965706, "lr": 3.63581798740511e-06, "wallclock_s": 443.84869027137756, "tokens_cum": 46753503}
+{"step": 137, "train_loss": 0.9046323611337279, "lr": 3.2003053681480098e-06, "wallclock_s": 456.73909306526184, "tokens_cum": 47155500}
+{"step": 138, "train_loss": 0.7837857229623479, "lr": 2.791706817741041e-06, "wallclock_s": 468.032014131546, "tokens_cum": 47497763}
+{"step": 139, "train_loss": 0.998001492962022, "lr": 2.41025731740801e-06, "wallclock_s": 486.6177222728729, "tokens_cum": 47820140}
+{"step": 140, "train_loss": 0.8358721570711537, "lr": 2.056176235206664e-06, "wallclock_s": 496.86172318458557, "tokens_cum": 48106836}
+{"step": 141, "train_loss": 0.8725767151597665, "lr": 1.729667199872187e-06, "wallclock_s": 506.02311611175537, "tokens_cum": 48399846}
+{"step": 142, "train_loss": 0.8695174337007634, "lr": 1.4309179837122044e-06, "wallclock_s": 521.1864061355591, "tokens_cum": 48768599}
+{"step": 143, "train_loss": 0.9211160909380763, "lr": 1.1601003946206724e-06, "wallclock_s": 532.6655051708221, "tokens_cum": 49072990}
+{"step": 144, "train_loss": 0.9700133920057188, "lr": 9.17370177272775e-07, "wallclock_s": 545.3593652248383, "tokens_cum": 49473417}
+{"step": 145, "train_loss": 0.9115461111763079, "lr": 7.028669235575714e-07, "wallclock_s": 556.880007982254, "tokens_cum": 49809537}
+{"step": 146, "train_loss": 0.8990919370725861, "lr": 5.167139923000553e-07, "wallclock_s": 568.9439182281494, "tokens_cum": 50142937}
+{"step": 147, "train_loss": 0.9429656329650312, "lr": 3.5901843831857576e-07, "wallclock_s": 580.2641799449921, "tokens_cum": 50472306}
+{"step": 148, "train_loss": 0.8024696243539972, "lr": 2.2987095085867937e-07, "wallclock_s": 591.5183942317963, "tokens_cum": 50784762}
+{"step": 149, "train_loss": 0.9027906795066596, "lr": 1.2934580143851295e-07, "wallclock_s": 603.8613932132721, "tokens_cum": 51141462}
+{"step": 150, "train_loss": 0.8671560125425712, "lr": 5.750080113598455e-08, "wallclock_s": 621.5849092006683, "tokens_cum": 51456334, "dev_loss": 0.8987016467640894, "checkpoint": "tinker://df9e7c47-fa5c-597e-a8d5-ea20edaa9035:train:0/sampler_weights/e3_reasoning_r32_s42_third_step00150"}
+{"step": 151, "train_loss": 0.9290695711612084, "lr": 1.4377267342158274e-08, "wallclock_s": 731.7752439975739, "tokens_cum": 51760501, "dev_loss": 0.8986976442770437, "checkpoint": "tinker://df9e7c47-fa5c-597e-a8d5-ea20edaa9035:train:0/sampler_weights/e3_reasoning_r32_s42_third_step00151"}
+selected checkpoint by dev loss: tinker://df9e7c47-fa5c-597e-a8d5-ea20edaa9035:train:0/sampler_weights/e3_reasoning_r32_s42_third_step00151 (0.8987)
