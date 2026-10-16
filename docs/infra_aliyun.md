@@ -56,3 +56,8 @@ Kubernetes API via kubeconfig, images built in-cluster (privileged DinD or Build
 - `src/eval/registry_copy.py` (pure-Python copier with Range-resume) remains for small fixes from inside a sandbox; `scripts/mirror_images.sh` / `build_tb2_images.sh` remain for an ECS box.
 - ACR namespace in use: `qwen36-1017` (personal edition, auto-create repositories on).
 - ACR VPC endpoint for machines inside the Hangzhou VPC (ECS, GPU box): `crpi-06uolilnsf90kidh-vpc.cn-hangzhou.personal.cr.aliyuncs.com` (no public-traffic charge); public endpoint `crpi-06uolilnsf90kidh.cn-hangzhou.personal.cr.aliyuncs.com` for GitHub Actions and sandboxes.
+
+## Template build findings (2026-10-17, from the ACR personal-edition image)
+- The templates API **accepts 32 vCPU / 48 GiB** at template creation (also 16/32 GiB, 8/16, 4/8, 1/4). Whether a sandbox actually boots at that spec is to be confirmed once an image builds.
+- Builds from **ACR personal edition fail** at the FC stage: `fc function create failed: 400 failed to optimization image due to: Image not stored in ACR is not supported yet`. The 极速版 docs require an **ACR Enterprise Edition** instance (same UID and region, VPC attached, not the Economy tier, image acceleration off). Personal-edition images are only reachable from ACS clusters (fallback route) or ECS.
+- Decision pending: (A) create an ACR EE 基础版 instance in Hangzhou and re-run the GitHub Actions mirror/build against it (`ACR_HOST`/`ACR_NAMESPACE` secrets), or (B) switch to ACS 容器版 + `harbor -e ack`, which pulls from any registry via a pull secret.

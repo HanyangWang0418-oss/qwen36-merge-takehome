@@ -1,0 +1,27 @@
+{
+  "probe-acr-sbp-1c": {
+    "cpu": 1,
+    "mem": 4096,
+    "error": "ConnectError('Request failed: error sending request for url (https://api.cn-hangzhou.sandbox.aliyuncs.com/v3/templates): client error (Connect): tls handshake eof')"
+  },
+  "probe-acr-sbp-32c": {
+    "cpu": 32,
+    "mem": 49152,
+    "error": "ReadTimeout('Request failed: error sending request for url (https://api.cn-hangzhou.sandbox.aliyuncs.com/templates/153voi8jz69d1epjo6bk/builds/9c91f498-0022-4762-a3f4-d6f9998585f2/status?logsOffset=2&limit=100): operation timed out')"
+  },
+  "probe-acr-sbp-16c": {
+    "cpu": 16,
+    "mem": 32768,
+    "error": "BuildException('template build error: fc function create failed: code: 400, failed to optimization image due to: Image not stored in ACR is not supported yet, please make sure specified image exists in any your ACR repository request id: d0fee01f-70de-4585-9381-959c0b5dbda2')"
+  },
+  "probe-acr-sbp-8c": {
+    "cpu": 8,
+    "mem": 16384,
+    "error": "BuildException('template build error: fc function create failed: code: 400, failed to optimization image due to: Image not stored in ACR is not supported yet, please make sure specified image exists in any your ACR repository request id: fe790757-412f-40cf-9021-c0ef0af6673f')"
+  },
+  "probe-acr-sbp-4c": {
+    "cpu": 4,
+    "mem": 8192,
+    "error": "BuildException('template build error: fc function create failed: code: 400, failed to optimization image due to: Image not stored in ACR is not supported yet, please make sure specified image exists in any your ACR repository request id: 7838b322-ff75-4439-b70a-dc3f136b9aa1')"
+  }
+}
