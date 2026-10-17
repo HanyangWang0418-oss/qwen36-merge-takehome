@@ -8,13 +8,16 @@ MODEL=$1; GROUP=$2; shift 2
 SEEDS="1 2 3 4 5"; TASKS=""
 while [ $# -gt 0 ]; do case $1 in --seeds) SEEDS=$2; shift 2;; --tasks) TASKS=$2; shift 2;; *) shift;; esac; done
 TBV=$(python3 -c "import json;print(json.load(open('data/manifests/terminal_bench_2_tasks.json'))['version'])")
+TBC=$(python3 -c "import json;print(json.load(open('data/manifests/terminal_bench_2_tasks.json'))['dataset_git_commit'][0])")
+TBP=third_party/terminal-bench-2   # laude-institute/terminal-bench-2 at the locked commit (eval/setup.sh); avoids Harbor Hub tag resolution
+[ "$(git -C $TBP rev-parse HEAD)" = "$TBC" ] || { echo "dataset checkout mismatch; run eval/setup.sh"; exit 1; }
 export OPENAI_API_KEY=${OPENAI_API_KEY:-dummy} OPENAI_API_BASE="$VLLM_BASE"
 TASK_ARGS=(); for t in $TASKS; do TASK_ARGS+=(-i "$t"); done
 mkdir -p logs/eval
 for SEED in $SEEDS; do
   JOB="tb2-${MODEL}-seed${SEED}"
-  echo "[$(date -u +%FT%TZ)] model=$MODEL seed=$SEED cpus=${TB_CPUS} mem_mb=${TB_MEM_MB} env=modal agent=terminus-2 dataset=terminal-bench@${TBV}" | tee -a logs/eval/${JOB}.log
-  harbor run -d "terminal-bench/terminal-bench@${TBV}" "${TASK_ARGS[@]}" -a terminus-2 -m "openai/${MODEL}" \
+  echo "[$(date -u +%FT%TZ)] model=$MODEL seed=$SEED cpus=${TB_CPUS} mem_mb=${TB_MEM_MB} env=modal agent=terminus-2 dataset=terminal-bench-2@${TBC:0:8} (v${TBV})" | tee -a logs/eval/${JOB}.log
+  harbor run -p "$TBP" "${TASK_ARGS[@]}" -a terminus-2 -m "openai/${MODEL}" \
     -e modal -n "${CONCURRENCY:-20}" -k 1 \
     --override-cpus "${TB_CPUS}" --override-memory-mb "${TB_MEM_MB}" \
     --ak api_base="$VLLM_BASE" --ak temperature=1.0 --ak max_thinking_tokens=81920 \

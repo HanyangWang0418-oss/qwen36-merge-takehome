@@ -9,9 +9,9 @@ curl -sf "$VLLM_BASE/chat/completions" -H 'Content-Type: application/json' -d '{
 echo "2) Modal oracle on one TB2 task"
 TBV=$(python3 -c "import json;print(json.load(open('data/manifests/terminal_bench_2_tasks.json'))['version'])")
 T1=$(python3 -c "import json;print(json.load(open('data/manifests/terminal_bench_2_tasks.json'))['task_ids'][0])")
-harbor run -d "terminal-bench/terminal-bench@${TBV}" -i "$T1" -a oracle -e modal -n 1 --job-name smoke-oracle -o jobs_smoke -y 2>&1 | tail -5
+harbor run -p third_party/terminal-bench-2 -i "$T1" -a oracle -e modal -n 1 --job-name smoke-oracle -o jobs_smoke -y 2>&1 | tail -5
 echo "3) one TB2 task with terminus-2 against the endpoint (model-card settings, 20 min cap)"
-harbor run -d "terminal-bench/terminal-bench@${TBV}" -i "$T1" -a terminus-2 -m "openai/base" -e modal -n 1 \
+harbor run -p third_party/terminal-bench-2 -i "$T1" -a terminus-2 -m "openai/base" -e modal -n 1 \
   --override-cpus "${TB_CPUS}" --override-memory-mb "${TB_MEM_MB}" --agent-timeout-multiplier 0.12 \
   --ak api_base="$VLLM_BASE" --ak temperature=1.0 --ak 'llm_call_kwargs={"extra_body":{"top_k":20},"top_p":0.95,"max_tokens":81920}' \
   --ae OPENAI_API_KEY="${OPENAI_API_KEY:-dummy}" --ae OPENAI_API_BASE="$VLLM_BASE" --allow-agent-host "$VLLM_HOST" \

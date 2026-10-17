@@ -23,6 +23,12 @@ ASI=$(python3 -c "import json;print(json.load(open('$M/asi_bench_tasks.json'))['
 [ -d third_party/ASI-Bench/.git ] || git clone -q https://github.com/apexin-ai/ASI-Bench third_party/ASI-Bench
 git -C third_party/ASI-Bench fetch -q origin "$ASI" && git -C third_party/ASI-Bench checkout -q "$ASI"
 echo "ASI-Bench @ $(git -C third_party/ASI-Bench rev-parse --short HEAD)"
+# Terminal-Bench 2.0 dataset at the locked commit (run with -p; Harbor Hub tags are not relied upon)
+TBU=$(python3 -c "import json;print(json.load(open('$M/terminal_bench_2_tasks.json'))['dataset_git_url'][0])")
+TBC=$(python3 -c "import json;print(json.load(open('$M/terminal_bench_2_tasks.json'))['dataset_git_commit'][0])")
+[ -d third_party/terminal-bench-2/.git ] || git clone -q "$TBU" third_party/terminal-bench-2
+git -C third_party/terminal-bench-2 fetch -q origin "$TBC" && git -C third_party/terminal-bench-2 checkout -q "$TBC"
+echo "terminal-bench-2 @ $(git -C third_party/terminal-bench-2 rev-parse --short HEAD) ($(ls -d third_party/terminal-bench-2/*/task.toml | wc -l | tr -d ' ') tasks)"
 # Pin tool versions into the lock config
 python3 - <<'PY'
 import json, re, subprocess, pathlib
