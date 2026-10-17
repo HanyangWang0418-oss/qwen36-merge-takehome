@@ -22,6 +22,11 @@ eval/
   collect.sh           harbor/hle/asi outputs -> results/<group>/<model>/<bench>/per_task.jsonl; summary + plots
 ```
 
+## Chosen setup
+vLLM runs on **our own 2× A100 80GB box** (`eval/serve.sh`, TP=2) and is exposed to Modal sandboxes through a cloudflared
+tunnel. `eval/modal_vllm.py` / the `modal-ops` workflow (vLLM on a Modal H200) are an **optional alternative that is not
+used**; `eval/modal_driver.py` is only needed if the driving machine cannot reach api.modal.com.
+
 ## Order of operations
 1. `cp eval/env.example eval/.env` and fill it in; `eval/setup.sh`.
 2. On the GPU box: `eval/serve.sh` (prints the public URL; keep it running under tmux).
