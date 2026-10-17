@@ -1,0 +1,73 @@
+name: modal-ops
+# Runs Modal operations from a GitHub runner (the development machine cannot reach api.modal.com).
+#   action=deploy          : modal deploy eval/modal_vllm.py (vLLM server app)
+#   action=prepare_weights : modal run eval/modal_vllm.py::prepare_weights (base + adapters -> Volume)
+#   action=test            : modal run eval/modal_vllm.py (health + one completion per served model)
+#   action=secret          : (re)create the Modal secret qwen36-vllm from GitHub secrets
+#   action=driver          : launch eval/modal_driver.py detached with `script` (e.g. "eval/run_all.sh base")
+# Secrets: MODAL_TOKEN_ID, MODAL_TOKEN_SECRET, VLLM_API_KEY, HF_TOKEN, TINKER_API_KEY, OPENAI_JUDGE_KEY (optional), ASIBENCH_JUDGE_API_KEY (optional)
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "deploy | prepare_weights | test | secret | driver"
+        required: true
+        default: "test"
+      script:
+        description: "for action=driver: shell command run inside the Modal driver container, e.g. eval/run_all.sh base"
+        required: false
+        default: ""
+      loras:
+        description: "for deploy: space-separated adapter names kept resident (default main 5)"
+        required: false
+        default: ""
+jobs:
+  op:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      VLLM_API_KEY: ${{ secrets.VLLM_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: modal client
+        run: |
+          uv venv .venv-modal --python 3.12 && . .venv-modal/bin/activate && uv pip install "modal==1.6.2" aiohttp pyyaml >/dev/null
+          modal profile current
+      - name: secret
+        if: ${{ github.event.inputs.action == 'secret' || github.event.inputs.action == 'deploy' }}
+        run: |
+          . .venv-modal/bin/activate
+          modal secret create qwen36-vllm VLLM_API_KEY="$VLLM_API_KEY" HF_TOKEN="$HF_TOKEN" --force
+          modal secret create qwen36-eval TINKER_API_KEY="${{ secrets.TINKER_API_KEY }}" HF_TOKEN="$HF_TOKEN" OPENAI_API_KEY="$VLLM_API_KEY" \
+            OPENAI_JUDGE_KEY="${{ secrets.OPENAI_JUDGE_KEY }}" ASIBENCH_JUDGE_API_KEY="${{ secrets.ASIBENCH_JUDGE_API_KEY }}" \
+            MODAL_TOKEN_ID="$MODAL_TOKEN_ID" MODAL_TOKEN_SECRET="$MODAL_TOKEN_SECRET" --force
+      - name: prepare_weights
+        if: ${{ github.event.inputs.action == 'prepare_weights' }}
+        run: . .venv-modal/bin/activate && modal run --detach eval/modal_vllm.py::prepare_weights 2>&1 | tail -40
+      - name: deploy
+        if: ${{ github.event.inputs.action == 'deploy' }}
+        env: { LORAS: "${{ github.event.inputs.loras }}" }
+        run: |
+          . .venv-modal/bin/activate
+          [ -z "$LORAS" ] && unset LORAS
+          modal deploy eval/modal_vllm.py 2>&1 | tee deploy.log | tail -20
+          URL=$(grep -oE "https://[a-zA-Z0-9.-]+modal\.direct[^ ]*|https://[a-zA-Z0-9.-]+modal\.run[^ ]*" deploy.log | head -1 || true)
+          echo "VLLM_URL=$URL" | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p data/manifests && python3 - "$URL" <<'PY'
+          import json, sys, datetime
+          p="data/manifests/serving.json"; d={"vllm_url": sys.argv[1], "deployed_at": datetime.datetime.utcnow().isoformat()+"Z", "gpu": "H200", "app": "qwen36-eval-vllm"}
+          json.dump(d, open(p,"w"), indent=2); print(d)
+          PY
+          git config user.name "github-actions[bot]"; git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/manifests/serving.json && git commit -m "serving.json: vLLM endpoint from deploy ${{ github.run_id }}" || true
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break || sleep 10; done
+      - name: test
+        if: ${{ github.event.inputs.action == 'test' }}
+        run: . .venv-modal/bin/activate && modal run eval/modal_vllm.py 2>&1 | tail -30
+      - name: driver
+        if: ${{ github.event.inputs.action == 'driver' }}
+        run: . .venv-modal/bin/activate && modal run --detach eval/modal_driver.py --script "${{ github.event.inputs.script }}" 2>&1 | tail -20
