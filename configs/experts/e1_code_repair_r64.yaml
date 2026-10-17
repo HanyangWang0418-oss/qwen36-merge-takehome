@@ -1,7 +1,7 @@
-# Expert training config — e1_code_repair_r128
+# Expert training config — e1_code_repair_r64
 # Trained on Tinker (LoRA, managed). Every value here is a snapshot of what
 # src/train/train_expert.py sends; logs/<run_id>/metadata.json repeats it.
-expert_name: e1_code_repair_r128   # CONTROL: rank 128 vs 32, same data/schedule as e1
+expert_name: e1_code_repair_r64   # CONTROL: rank 64 vs 32 (Tinker max), same data/schedule as e1
 target_benchmark: "swebench_pro_v2_hard"
 data_domain: code_repair
 data_description: "Issue-to-patch agent trajectories (SWE-Gym, SWE-smith, SWE-rebench), all 11 SWE-bench Pro repos excluded"
@@ -14,8 +14,8 @@ base:
 
 method: lora                             # Tinker only offers LoRA; full FT is out of budget (35B MoE)
 lora:
-  rank: 128
-  alpha: 256                              # Tinker convention alpha = 2 * rank unless overridden
+  rank: 64                               # Tinker caps LoRA rank at 64 for Qwen3.6-35B-A3B (128 rejected)
+  alpha: 128                              # Tinker convention alpha = 2 * rank unless overridden
   target_modules: all_linear             # Tinker flags below; exact HF module list read from exported adapter_config.json
   tinker_flags: {train_attn: true, train_mlp: true, train_unembed: true}   # create_lora_training_client kwargs; MoE experts fall under train_mlp
   dropout: 0.0
@@ -43,7 +43,7 @@ checkpointing:
   save_every_steps: 25
   keep: all
   select_by: dev_loss_min                # never by benchmark score
-  export: peft_adapter                   # weights.build_lora_adapter -> models/weights/e1_code_repair_r128/
+  export: peft_adapter                   # weights.build_lora_adapter -> models/weights/e1_code_repair_r64/
 
 seed: 42
-run_id: e1_code_repair_r128_s42
+run_id: e1_code_repair_r64_s42
