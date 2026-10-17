@@ -1,0 +1,10 @@
+# Control B: rank-64 code expert in place of the rank-32 one (same data/schedule); TA λ0.7
+method: task_arithmetic
+density: 1.0
+out_rank: 128
+seed: 0
+output_dir: models/weights/merged_ta_l0.7_r64
+experts:
+  - {path: models/weights/e1_code_repair_r64,  lambda: 0.7, layers: null}
+  - {path: models/weights/e2_terminal_agent,   lambda: 0.7, layers: null}
+  - {path: models/weights/e3_reasoning,        lambda: 0.7, layers: null}

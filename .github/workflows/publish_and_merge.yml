@@ -15,22 +15,32 @@ on:
         description: "space-separated configs/merge/*.yaml names (empty = ta_l0.7 ties_d0.2)"
         required: false
         default: "ta_l0.7 ties_d0.2"
+      experts:
+        description: "space-separated expert=run_id pairs to publish (default: the three main experts)"
+        required: false
+        default: "e1_code_repair=e1_code_repair_r32_s42_20261016 e2_terminal_agent=e2_terminal_agent_r32_s42_20261016 e3_reasoning=e3_reasoning_r32_s42_third"
 env:
   HF_USER: ${{ vars.HF_USER || 'ssyhw7' }}
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        run: |
+          python3 - "${{ github.event.inputs.experts }}" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          pairs = [p.split("=", 1) for p in sys.argv[1].split() if "=" in p]
+          print("matrix=" + json.dumps({"include": [{"expert": e, "run": r} for e, r in pairs]}))
+          PY
   publish:
     if: ${{ github.event.inputs.stage == 'publish' || github.event.inputs.stage == 'all' }}
+    needs: [plan]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - expert: e1_code_repair
-            run: e1_code_repair_r32_s42_20261016
-          - expert: e2_terminal_agent
-            run: e2_terminal_agent_r32_s42_20261016
-          - expert: e3_reasoning
-            run: e3_reasoning_r32_s42_third
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -52,13 +62,9 @@ jobs:
           import json; c=json.load(open("$RUNNER_TEMP/cfg/adapter_config.json"))
           print(json.dumps({k:c.get(k) for k in ("r","lora_alpha","target_modules","base_model_name_or_path","peft_type")}, indent=1)[:3000])
           PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: adapter_config_${{ matrix.expert }}
-          path: ${{ runner.temp }}/cfg/adapter_config.json
   merge:
     if: ${{ always() && (github.event.inputs.stage == 'merge' || github.event.inputs.stage == 'all') && (needs.publish.result == 'success' || needs.publish.result == 'skipped') }}
-    needs: [publish]
+    needs: [plan, publish]
     runs-on: ubuntu-latest
     timeout-minutes: 350
     permissions:
@@ -76,13 +82,26 @@ jobs:
           . /mnt/work/venv/bin/activate
           uv pip install --index-url https://download.pytorch.org/whl/cpu torch
           uv pip install safetensors pyyaml "huggingface_hub[cli]" numpy
-      - name: download expert adapters from HF
+      - name: download expert adapters referenced by the selected configs
         env: { HF_TOKEN: "${{ secrets.HF_TOKEN }}" }
         run: |
           . /mnt/work/venv/bin/activate
-          for e in e1_code_repair e2_terminal_agent e3_reasoning; do
+          uv pip install pyyaml >/dev/null
+          EXPERTS=$(python - ${{ github.event.inputs.merge_configs || 'ta_l0.7 ties_d0.2' }} <<'PY'
+          import sys, yaml, os
+          names = set()
+          for c in sys.argv[1:]:
+              for e in yaml.safe_load(open(f"configs/merge/{c}.yaml"))["experts"]:
+                  names.add(os.path.basename(e["path"]))
+          print(" ".join(sorted(names)))
+          PY
+          )
+          echo "experts needed: $EXPERTS"
+          mkdir -p models/weights
+          for e in $EXPERTS; do
             hf download "$HF_USER/qwen36-35b-$e" --local-dir "/mnt/work/models/weights/$e" --include "adapter_config.json" --include "adapter_model*.safetensors" >/dev/null
-            ls -la "/mnt/work/models/weights/$e" | tail -3
+            ln -sfn "/mnt/work/models/weights/$e" "models/weights/$e"
+            ls -la "/mnt/work/models/weights/$e" | tail -2
           done
           df -h /mnt | tail -1
       - name: merge + upload
@@ -90,9 +109,6 @@ jobs:
         run: |
           set -euo pipefail
           . /mnt/work/venv/bin/activate
-          mkdir -p models/weights && ln -sfn /mnt/work/models/weights/e1_code_repair models/weights/e1_code_repair \
-            && ln -sfn /mnt/work/models/weights/e2_terminal_agent models/weights/e2_terminal_agent \
-            && ln -sfn /mnt/work/models/weights/e3_reasoning models/weights/e3_reasoning
           mkdir -p data/manifests/merge_recipes
           for cfg in ${{ github.event.inputs.merge_configs || 'ta_l0.7 ties_d0.2' }}; do
             out="/mnt/work/models/weights/merged_$cfg"
@@ -120,7 +136,7 @@ jobs:
           import json, os
           from huggingface_hub import HfApi
           api = HfApi(token=os.environ["HF_TOKEN"]); p = "data/manifests/hf_models.json"; m = json.load(open(p)) if os.path.exists(p) else {}
-          for e in ["e1_code_repair","e2_terminal_agent","e3_reasoning"]:
+          for e in ["e1_code_repair","e2_terminal_agent","e3_reasoning","e1_code_repair_r64","e2a_terminal_only","e2b_terminal_swe"]:
               repo = f"{os.environ['HF_USER']}/qwen36-35b-{e}"
               try: m[e] = {"repo_id": repo, "revision": api.model_info(repo).sha, "url": f"https://huggingface.co/{repo}"}
               except Exception as ex: m[e] = {"repo_id": repo, "error": str(ex)[:200]}
