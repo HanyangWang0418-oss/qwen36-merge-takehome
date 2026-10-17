@@ -1,0 +1,108 @@
+{
+  "created_at": "2026-10-17T09:24:30.131689+00:00",
+  "config_path": "configs/merge/dare_ties_d0.3.yaml",
+  "config": {
+    "method": "dare_ties",
+    "density": 0.3,
+    "out_rank": 96,
+    "seed": 0,
+    "output_dir": "models/weights/merged_dare_ties_d0.3",
+    "experts": [
+      {
+        "path": "models/weights/e1_code_repair",
+        "lambda": 1.0,
+        "layers": null
+      },
+      {
+        "path": "models/weights/e2_terminal_agent",
+        "lambda": 1.0,
+        "layers": null
+      },
+      {
+        "path": "models/weights/e3_reasoning",
+        "lambda": 1.0,
+        "layers": null
+      }
+    ]
+  },
+  "base_model": "Qwen/Qwen3.6-35B-A3B",
+  "method": "dare_ties",
+  "density": 0.3,
+  "out_rank": 96,
+  "experts": [
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e1_code_repair",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 1.0,
+      "layers": "all"
+    },
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e2_terminal_agent",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 1.0,
+      "layers": "all"
+    },
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e3_reasoning",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 1.0,
+      "layers": "all"
+    }
+  ],
+  "n_modules_merged": 431,
+  "n_modules_3d": 120,
+  "n_modules_skipped": 0,
+  "svd_rel_error": {
+    "mean": 0.7594049572944641,
+    "max": 0.8295281529426575,
+    "p90": 0.819566011428833
+  },
+  "svd_rel_error_by_layer": {
+    "0": 0.7567547058208891,
+    "1": 0.7629882684466807,
+    "10": 0.7608135339308245,
+    "11": 0.7474894460649038,
+    "12": 0.7673776664570212,
+    "13": 0.7649977508481676,
+    "14": 0.7579238773749283,
+    "15": 0.7446553883747209,
+    "16": 0.7635526690479029,
+    "17": 0.7618995977067512,
+    "18": 0.7595342805995068,
+    "19": 0.743160881550737,
+    "2": 0.7590180674059869,
+    "20": 0.7614471494888214,
+    "21": 0.7665517401024968,
+    "22": 0.7604658870167007,
+    "23": 0.7433329012883056,
+    "24": 0.7701425213339032,
+    "25": 0.760991285469553,
+    "26": 0.7609016611075193,
+    "27": 0.7481597188840541,
+    "28": 0.7626983141174395,
+    "29": 0.7652665951155743,
+    "3": 0.7365860214921908,
+    "30": 0.7668574837478729,
+    "31": 0.7473873970922702,
+    "32": 0.7651040965560019,
+    "33": 0.7646136448875638,
+    "34": 0.7681190289834443,
+    "35": 0.7480964735086114,
+    "36": 0.7680372656162299,
+    "37": 0.7662723554641477,
+    "38": 0.7634192022021318,
+    "39": 0.7461643020993768,
+    "4": 0.7700310138055809,
+    "5": 0.7699413621593719,
+    "6": 0.7689195658733955,
+    "7": 0.7418781591267927,
+    "8": 0.7608924360473416,
+    "9": 0.7639965374906109,
+    "other": 0.7195904249717857
+  },
+  "conflict_handling": "random drop + rescale before TIES sign election",
+  "layout_note": "3D MoE modules: task_arithmetic concatenates on the rank axis; SVD-based methods use one joint SVD over stacked experts, both keep the shared-side broadcast layout"
+}

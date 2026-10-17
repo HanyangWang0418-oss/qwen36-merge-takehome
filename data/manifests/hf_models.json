@@ -101,5 +101,23 @@
     "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7_r64",
     "method": "task_arithmetic",
     "adapter_bytes": 8983536880
+  },
+  "merged_ties_d0.5": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ties_d0.5",
+    "revision": "72beaa5423b4a0060444397860ab8bacc1fa4d4b",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ties_d0.5",
+    "method": "ties",
+    "out_rank": 96,
+    "adapter_bytes": 6737682760,
+    "private": false
+  },
+  "merged_dare_ties_d0.3": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-dare_ties_d0.3",
+    "revision": "ab17b367a0030c78819c2dd24a7299aedb639b52",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-dare_ties_d0.3",
+    "method": "dare_ties",
+    "out_rank": 96,
+    "adapter_bytes": 6737682760,
+    "private": false
   }
 }
