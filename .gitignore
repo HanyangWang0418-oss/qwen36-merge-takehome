@@ -22,3 +22,4 @@ hf_instances_*/
 out_seed*/
 .pytest_cache/
 eval/.env
+third_party/

@@ -27,7 +27,7 @@ harness:
 agent:
   name: locked_mini_swe:LockedMiniSwe   # self-hosted models use the mini-swe-agent locked agent
   config_file: v2/tooling/configs/mini_toolcall.yaml
-  mini_swe_agent_version: LOCK
+  mini_swe_agent_version: installed in-sandbox by LockedMiniSwe (see v2/tooling/locked_mini_swe.py pin)
   model_endpoint: openai_compatible      # OPENAI_API_BASE -> our vLLM server
   network: no-network                    # agent sandbox offline; only model host allowed
   disallowed_tools: [WebFetch, WebSearch]
