@@ -28,9 +28,9 @@ inference:
   dtype: bf16
   quantization: none
   tools: none
-  temperature: 1.0                       # Qwen "thinking, general" setting; official HLE script default is 0, overridden and disclosed
-  top_p: 0.95
-  top_k: 20
+  temperature: 1.0                       # Qwen "thinking, general" setting; official HLE script default is 0, overridden via --temperature and disclosed
+  top_p: 0.95                            # not settable in the official script; comes from the base model generation_config.json via vLLM --generation-config auto
+  top_k: 20                              # same (server-side default), identical for every model
   max_tokens: 32768                      # official README requires >= 8192 for reasoning models
   context_window: 65536
 

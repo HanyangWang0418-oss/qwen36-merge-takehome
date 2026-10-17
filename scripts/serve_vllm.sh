@@ -43,5 +43,6 @@ exec vllm serve Qwen/Qwen3.6-35B-A3B --revision "$REV" \
   --enable-lora --max-lora-rank "$MAX_RANK" --max-loras "${MAX_LORAS:-3}" --lora-modules "${LORA_ARGS[@]}" \
   ${MIXED_MOE_LORA:+--enable-mixed-moe-lora-format} \
   --reasoning-parser qwen3 --enable-auto-tool-choice --tool-call-parser hermes \
+  --generation-config auto \
   --served-model-name base \
   --port "${PORT:-8000}" 2>&1 | tee -a logs/vllm_server.log

@@ -23,6 +23,6 @@ PYTHONPATH=$SBP/v2/tooling OPENAI_API_KEY=${OPENAI_API_KEY:-dummy} OPENAI_API_BA
   --ae OPENAI_API_KEY="${OPENAI_API_KEY:-dummy}" --ae OPENAI_API_BASE="$VLLM_BASE" --allow-agent-host "$VLLM_HOST" \
   --job-name smoke-sbp -o jobs_smoke -y 2>&1 | tail -8
 echo "5) HLE: 3 questions (prediction only)"
-HLE=third_party/hle; [ -d "$HLE/hle_text_only" ] || uv run python src/eval/hle_textonly_dataset.py data/manifests/hle_text_only_ids.json "$HLE/hle_text_only"
+HLE=third_party/hle; [ -f "$HLE/hle_text_only/test-00000-of-00001.parquet" ] || uv run python src/eval/hle_textonly_dataset.py data/manifests/hle_text_only_ids.json "$HLE/hle_text_only"
 ( cd "$HLE/hle_eval" && OPENAI_BASE_URL="$VLLM_BASE" OPENAI_API_KEY=dummy python run_model_predictions.py --dataset ../hle_text_only --model base --max_completion_tokens 4096 --num_workers 3 --max_samples 3 ) 2>&1 | tail -3
 echo "smoke OK"

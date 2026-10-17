@@ -31,12 +31,12 @@ agent:
     api_protocol: openai
     api_base: "<our vLLM endpoint>"
     supports_image_input: false
-  step_budget: LOCK
-  per_task_timeout_s: LOCK
+  step_budget: "asibench 0.2.0 opencode adapter default (not overridden; recorded from the run metadata)"
+  per_task_timeout_s: "asibench 0.2.0 default (not overridden; recorded from the run metadata)"
 
 judge:
-  provider: LOCK                           # ASIBENCH_JUDGE_* ; must be identical for all models
-  model: LOCK
+  provider: openai                         # ASIBENCH_JUDGE_API_BASE=https://api.openai.com/v1; identical for all models
+  model: gpt-5-mini                        # fixed before any ASI run; the same judge for every model
 
 inference:
   thinking: true
