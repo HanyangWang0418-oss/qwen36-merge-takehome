@@ -1,0 +1,9 @@
+# Ablation: two-expert merge without the reasoning expert, to test whether e3 helps or hurts the merged model.
+method: task_arithmetic
+density: 1.0
+out_rank: 64
+seed: 0
+output_dir: models/weights/merged_ta_l0.7_no_e3
+experts:
+  - {path: models/weights/e1_code_repair,    lambda: 0.7, layers: null}
+  - {path: models/weights/e2_terminal_agent, lambda: 0.7, layers: null}
