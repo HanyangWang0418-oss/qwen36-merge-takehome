@@ -1,0 +1,85 @@
+tokenized 354 examples, dropped 0 over max_seq_len=32768
+tokenized 33 examples, dropped 0 over max_seq_len=32768
+{
+  "run_id": "e2b_terminal_swe_r32_s42",
+  "config_path": "configs/experts/e2b_terminal_swe.yaml",
+  "n_train_examples": 354,
+  "n_dev_examples": 33,
+  "n_train_tokens": 5450303,
+  "n_loss_tokens": 1589456.0,
+  "steps_per_epoch": 23,
+  "max_steps": 69,
+  "launch_command": "src/train/train_expert.py configs/experts/e2b_terminal_swe.yaml",
+  "started_at": "2026-10-17T04:29:43.993799+00:00",
+  "hardware": "Tinker managed cluster (GPU type not exposed by the API)"
+}
+{"step": 1, "train_loss": 0.6692379272162896, "lr": 5e-06, "wallclock_s": 19.29600691795349, "tokens_cum": 243228}
+{"step": 2, "train_loss": 0.6917020782866046, "lr": 1e-05, "wallclock_s": 29.776577949523926, "tokens_cum": 477143}
+{"step": 3, "train_loss": 0.6582374073268846, "lr": 1.5000000000000002e-05, "wallclock_s": 40.38624286651611, "tokens_cum": 739316}
+{"step": 4, "train_loss": 0.6128097919509122, "lr": 2e-05, "wallclock_s": 54.192450761795044, "tokens_cum": 983254}
+{"step": 5, "train_loss": 0.6478293008096727, "lr": 2.5e-05, "wallclock_s": 63.650079011917114, "tokens_cum": 1212839}
+{"step": 6, "train_loss": 0.6420873878522388, "lr": 3.0000000000000004e-05, "wallclock_s": 73.31138205528259, "tokens_cum": 1445165}
+{"step": 7, "train_loss": 0.5959370709645088, "lr": 3.5e-05, "wallclock_s": 86.70506191253662, "tokens_cum": 1701928}
+{"step": 8, "train_loss": 0.6026236531345673, "lr": 4e-05, "wallclock_s": 97.00076079368591, "tokens_cum": 1954696}
+{"step": 9, "train_loss": 0.5480185071631515, "lr": 4.5e-05, "wallclock_s": 106.81901168823242, "tokens_cum": 2209856}
+{"step": 10, "train_loss": 0.5320746235209023, "lr": 5e-05, "wallclock_s": 116.54022979736328, "tokens_cum": 2454144}
+{"step": 11, "train_loss": 0.5379262416601468, "lr": 5.5e-05, "wallclock_s": 129.36908888816833, "tokens_cum": 2711318}
+{"step": 12, "train_loss": 0.5501398173981132, "lr": 6.000000000000001e-05, "wallclock_s": 140.52351093292236, "tokens_cum": 2945934}
+{"step": 13, "train_loss": 0.47848311485236955, "lr": 6.500000000000001e-05, "wallclock_s": 153.37677693367004, "tokens_cum": 3212710}
+{"step": 14, "train_loss": 0.49949316198703525, "lr": 7e-05, "wallclock_s": 164.77578902244568, "tokens_cum": 3444055}
+{"step": 15, "train_loss": 0.49830352585378457, "lr": 7.500000000000001e-05, "wallclock_s": 184.77465867996216, "tokens_cum": 3706436}
+{"step": 16, "train_loss": 0.4966307976597968, "lr": 8e-05, "wallclock_s": 197.3245108127594, "tokens_cum": 3941191}
+{"step": 17, "train_loss": 0.5263988354851322, "lr": 8.5e-05, "wallclock_s": 207.12424778938293, "tokens_cum": 4167347}
+{"step": 18, "train_loss": 0.4948302212578285, "lr": 9e-05, "wallclock_s": 220.24083471298218, "tokens_cum": 4429341}
+{"step": 19, "train_loss": 0.4454273931328118, "lr": 9.5e-05, "wallclock_s": 234.96213579177856, "tokens_cum": 4680737}
+{"step": 20, "train_loss": 0.46764933115960255, "lr": 0.0001, "wallclock_s": 243.79163074493408, "tokens_cum": 4922061}
+{"step": 21, "train_loss": 0.4450625965748294, "lr": 0.0001, "wallclock_s": 259.33626079559326, "tokens_cum": 5169287}
+{"step": 22, "train_loss": 0.45630926977419256, "lr": 9.989726963751682e-05, "wallclock_s": 274.4704267978668, "tokens_cum": 5417845}
+{"step": 23, "train_loss": 0.42230050005990394, "lr": 9.95895006911623e-05, "wallclock_s": 281.0049488544464, "tokens_cum": 5450303}
+{"step": 24, "train_loss": 0.453480535787566, "lr": 9.907795784955327e-05, "wallclock_s": 295.4871838092804, "tokens_cum": 5676322}
+{"step": 25, "train_loss": 0.4648972558503831, "lr": 9.836474315195147e-05, "wallclock_s": 316.4657778739929, "tokens_cum": 5927536, "dev_loss": 0.4534992659397433, "checkpoint": "tinker://b9ee1b6f-61e5-5516-813c-248c15ec1931:train:0/sampler_weights/e2b_terminal_swe_r32_s42_step00025"}
+{"step": 26, "train_loss": 0.4418670911873229, "lr": 9.745278735053343e-05, "wallclock_s": 378.6467468738556, "tokens_cum": 6209486}
+{"step": 27, "train_loss": 0.40586046152916183, "lr": 9.63458378673011e-05, "wallclock_s": 392.10871386528015, "tokens_cum": 6419228}
+{"step": 28, "train_loss": 0.4321190831381968, "lr": 9.504844339512095e-05, "wallclock_s": 403.53497886657715, "tokens_cum": 6662216}
+{"step": 29, "train_loss": 0.4221546503464165, "lr": 9.356593520616948e-05, "wallclock_s": 421.9160199165344, "tokens_cum": 6908708}
+{"step": 30, "train_loss": 0.4549534215716127, "lr": 9.190440524459203e-05, "wallclock_s": 433.3751208782196, "tokens_cum": 7173828}
+{"step": 31, "train_loss": 0.4135795933344255, "lr": 9.007068109339784e-05, "wallclock_s": 447.5584988594055, "tokens_cum": 7416452}
+{"step": 32, "train_loss": 0.4518953284217194, "lr": 8.807229791845673e-05, "wallclock_s": 458.37399983406067, "tokens_cum": 7672089}
+{"step": 33, "train_loss": 0.3818622331414053, "lr": 8.591746750488639e-05, "wallclock_s": 468.49890208244324, "tokens_cum": 7906391}
+{"step": 34, "train_loss": 0.38283759494915137, "lr": 8.361504451306585e-05, "wallclock_s": 482.68667793273926, "tokens_cum": 8166041}
+{"step": 35, "train_loss": 0.37535761935431916, "lr": 8.117449009293668e-05, "wallclock_s": 492.0954849720001, "tokens_cum": 8439290}
+{"step": 36, "train_loss": 0.424769472560837, "lr": 7.860583300610849e-05, "wallclock_s": 501.2976109981537, "tokens_cum": 8670471}
+{"step": 37, "train_loss": 0.39694730395945355, "lr": 7.591962841552627e-05, "wallclock_s": 512.2822830677032, "tokens_cum": 8891482}
+{"step": 38, "train_loss": 0.4142606844928081, "lr": 7.312691451204178e-05, "wallclock_s": 523.7356050014496, "tokens_cum": 9133856}
+{"step": 39, "train_loss": 0.41297916780563687, "lr": 7.023916715611969e-05, "wallclock_s": 542.2667999267578, "tokens_cum": 9395042}
+{"step": 40, "train_loss": 0.40867769769581963, "lr": 6.726825272106538e-05, "wallclock_s": 552.9779028892517, "tokens_cum": 9667824}
+{"step": 41, "train_loss": 0.37229393974126296, "lr": 6.422637933155162e-05, "wallclock_s": 564.0970051288605, "tokens_cum": 9924127}
+{"step": 42, "train_loss": 0.42350109642231276, "lr": 6.112604669781572e-05, "wallclock_s": 574.497181892395, "tokens_cum": 10144407}
+{"step": 43, "train_loss": 0.4210964764263876, "lr": 5.7979994751668964e-05, "wallclock_s": 583.5741770267487, "tokens_cum": 10397681}
+{"step": 44, "train_loss": 0.4146641377711194, "lr": 5.480115129538409e-05, "wallclock_s": 592.6369709968567, "tokens_cum": 10620975}
+{"step": 45, "train_loss": 0.38138979195354744, "lr": 5.1602578878582776e-05, "wallclock_s": 601.8088088035583, "tokens_cum": 10869373}
+{"step": 46, "train_loss": 0.4582075518832355, "lr": 4.839742112141724e-05, "wallclock_s": 607.4681658744812, "tokens_cum": 10900606}
+{"step": 47, "train_loss": 0.3853823267007086, "lr": 4.5198848704615914e-05, "wallclock_s": 618.8359818458557, "tokens_cum": 11134465}
+{"step": 48, "train_loss": 0.38266084137936424, "lr": 4.2020005248331054e-05, "wallclock_s": 629.9369628429413, "tokens_cum": 11392021}
+{"step": 49, "train_loss": 0.3990557192714145, "lr": 3.887395330218429e-05, "wallclock_s": 641.6576919555664, "tokens_cum": 11633624}
+{"step": 50, "train_loss": 0.3959472855145752, "lr": 3.5773620668448384e-05, "wallclock_s": 654.5600099563599, "tokens_cum": 11873654, "dev_loss": 0.42047940048495835, "checkpoint": "tinker://b9ee1b6f-61e5-5516-813c-248c15ec1931:train:0/sampler_weights/e2b_terminal_swe_r32_s42_step00050"}
+{"step": 51, "train_loss": 0.3687505019896833, "lr": 3.273174727893463e-05, "wallclock_s": 703.2913568019867, "tokens_cum": 12095334}
+{"step": 52, "train_loss": 0.36932625507690764, "lr": 2.976083284388031e-05, "wallclock_s": 711.7413058280945, "tokens_cum": 12360814}
+{"step": 53, "train_loss": 0.3888179104491658, "lr": 2.687308548795825e-05, "wallclock_s": 720.8672177791595, "tokens_cum": 12585652}
+{"step": 54, "train_loss": 0.3857970245677583, "lr": 2.4080371584473748e-05, "wallclock_s": 728.9562339782715, "tokens_cum": 12821162}
+{"step": 55, "train_loss": 0.3932369801852178, "lr": 2.139416699389153e-05, "wallclock_s": 737.0149147510529, "tokens_cum": 13096819}
+{"step": 56, "train_loss": 0.3822535679154426, "lr": 1.8825509907063327e-05, "wallclock_s": 745.0039129257202, "tokens_cum": 13326294}
+{"step": 57, "train_loss": 0.36649420123292675, "lr": 1.6384955486934156e-05, "wallclock_s": 754.3234648704529, "tokens_cum": 13565975}
+{"step": 58, "train_loss": 0.4100683130566424, "lr": 1.4082532495113626e-05, "wallclock_s": 764.611722946167, "tokens_cum": 13836797}
+{"step": 59, "train_loss": 0.41523273172266073, "lr": 1.1927702081543279e-05, "wallclock_s": 772.0935590267181, "tokens_cum": 14067050}
+{"step": 60, "train_loss": 0.3844313358557781, "lr": 9.929318906602175e-06, "wallclock_s": 781.8696038722992, "tokens_cum": 14329158}
+{"step": 61, "train_loss": 0.40220293813677777, "lr": 8.09559475540797e-06, "wallclock_s": 791.8447177410126, "tokens_cum": 14568399}
+{"step": 62, "train_loss": 0.3834955178089663, "lr": 6.43406479383053e-06, "wallclock_s": 801.236921787262, "tokens_cum": 14823867}
+{"step": 63, "train_loss": 0.38558410179437586, "lr": 4.951556604879048e-06, "wallclock_s": 811.7776439189911, "tokens_cum": 15068468}
+{"step": 64, "train_loss": 0.38582579136682404, "lr": 3.654162132698918e-06, "wallclock_s": 820.9104697704315, "tokens_cum": 15316141}
+{"step": 65, "train_loss": 0.3514918819550739, "lr": 2.547212649466568e-06, "wallclock_s": 830.4263317584991, "tokens_cum": 15601994}
+{"step": 66, "train_loss": 0.38400458335493615, "lr": 1.6352568480485276e-06, "wallclock_s": 841.1563279628754, "tokens_cum": 15865158}
+{"step": 67, "train_loss": 0.36835667123307014, "lr": 9.220421504467281e-07, "wallclock_s": 853.1424310207367, "tokens_cum": 16092458}
+{"step": 68, "train_loss": 0.3592500669767302, "lr": 4.104993088376974e-07, "wallclock_s": 891.1387588977814, "tokens_cum": 16324123}
+{"step": 69, "train_loss": 0.3721995902622312, "lr": 1.0273036248318324e-07, "wallclock_s": 898.7786927223206, "tokens_cum": 16350909, "dev_loss": 0.4178406653593971, "checkpoint": "tinker://b9ee1b6f-61e5-5516-813c-248c15ec1931:train:0/sampler_weights/e2b_terminal_swe_r32_s42_step00069"}
+selected checkpoint by dev loss: tinker://b9ee1b6f-61e5-5516-813c-248c15ec1931:train:0/sampler_weights/e2b_terminal_swe_r32_s42_step00069 (0.4178)

@@ -1,0 +1,73 @@
+{
+  "run_id": "e1_code_repair_r64_s42",
+  "config": {
+    "expert_name": "e1_code_repair_r64",
+    "target_benchmark": "swebench_pro_v2_hard",
+    "data_domain": "code_repair",
+    "data_description": "Issue-to-patch agent trajectories (SWE-Gym, SWE-smith, SWE-rebench), all 11 SWE-bench Pro repos excluded",
+    "base": {
+      "tinker_model": "Qwen/Qwen3.6-35B-A3B",
+      "hf_model": "Qwen/Qwen3.6-35B-A3B",
+      "hf_revision": "LOCK",
+      "chat_template": "base"
+    },
+    "method": "lora",
+    "lora": {
+      "rank": 64,
+      "alpha": 128,
+      "target_modules": "all_linear",
+      "tinker_flags": {
+        "train_attn": true,
+        "train_mlp": true,
+        "train_unembed": true
+      },
+      "dropout": 0.0
+    },
+    "quantization": "none",
+    "optim": {
+      "learning_rate": 0.0001,
+      "lr_schedule": "cosine",
+      "warmup_steps": 20,
+      "weight_decay": 0.0,
+      "batch_size_examples": 32,
+      "max_seq_len": 32768,
+      "n_train_examples": 16000,
+      "epochs": 2,
+      "max_steps": null,
+      "grad_clip": 1.0
+    },
+    "data": {
+      "train_file": "data/processed/e1_code_repair_train.jsonl",
+      "dev_file": "data/processed/e1_code_repair_dev.jsonl",
+      "dev_size": 500,
+      "loss_on": "assistant_only"
+    },
+    "checkpointing": {
+      "save_every_steps": 25,
+      "keep": "all",
+      "select_by": "dev_loss_min",
+      "export": "peft_adapter"
+    },
+    "seed": 42,
+    "run_id": "e1_code_repair_r64_s42"
+  },
+  "config_path": "configs/experts/e1_code_repair_r64.yaml",
+  "n_train_examples": 1206,
+  "n_dev_examples": 128,
+  "n_train_tokens": 20983635,
+  "n_loss_tokens": 4051850.0,
+  "steps_per_epoch": 38,
+  "max_steps": 76,
+  "launch_command": "src/train/train_expert.py configs/experts/e1_code_repair_r64.yaml",
+  "started_at": "2026-10-17T04:32:18.440378+00:00",
+  "hardware": "Tinker managed cluster (GPU type not exposed by the API)",
+  "lora_flags": {
+    "train_mlp": true,
+    "train_attn": true,
+    "train_unembed": true
+  },
+  "finished_at": "2026-10-17T05:09:39.983523+00:00",
+  "best_dev_loss": 0.1600496132555727,
+  "selected_checkpoint": "tinker://6a10a3e9-4a5d-5f3f-8b6f-271abd6667cc:train:0/sampler_weights/e1_code_repair_r64_s42_step00075",
+  "selection_rule": "dev_loss_min"
+}

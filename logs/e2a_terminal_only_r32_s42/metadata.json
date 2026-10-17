@@ -1,0 +1,73 @@
+{
+  "run_id": "e2a_terminal_only_r32_s42",
+  "config": {
+    "expert_name": "e2a_terminal_only",
+    "target_benchmark": "terminal_bench_2",
+    "data_domain": "terminal_agent",
+    "data_description": "e2 data restricted to pure terminal sources: TMax-Agent-SFT-terminus, Terminal-Bench 1.x traces (TB2 overlap removed), AgentInstruct os",
+    "base": {
+      "tinker_model": "Qwen/Qwen3.6-35B-A3B",
+      "hf_model": "Qwen/Qwen3.6-35B-A3B",
+      "hf_revision": "LOCK",
+      "chat_template": "base"
+    },
+    "method": "lora",
+    "lora": {
+      "rank": 32,
+      "alpha": 64,
+      "target_modules": "all_linear",
+      "tinker_flags": {
+        "train_attn": true,
+        "train_mlp": true,
+        "train_unembed": true
+      },
+      "dropout": 0.0
+    },
+    "quantization": "none",
+    "optim": {
+      "learning_rate": 0.0001,
+      "lr_schedule": "cosine",
+      "warmup_steps": 20,
+      "weight_decay": 0.0,
+      "batch_size_examples": 32,
+      "max_seq_len": 32768,
+      "n_train_examples": 2368,
+      "epochs": 2,
+      "max_steps": null,
+      "grad_clip": 1.0
+    },
+    "data": {
+      "train_file": "data/processed/e2a_terminal_only_train.jsonl",
+      "dev_file": "data/processed/e2a_terminal_only_dev.jsonl",
+      "dev_size": 269,
+      "loss_on": "assistant_only"
+    },
+    "checkpointing": {
+      "save_every_steps": 100,
+      "keep": "all",
+      "select_by": "dev_loss_min",
+      "export": "peft_adapter"
+    },
+    "seed": 42,
+    "run_id": "e2a_terminal_only_r32_s42"
+  },
+  "config_path": "configs/experts/e2a_terminal_only.yaml",
+  "n_train_examples": 2364,
+  "n_dev_examples": 269,
+  "n_train_tokens": 17020551,
+  "n_loss_tokens": 7651038.0,
+  "steps_per_epoch": 74,
+  "max_steps": 148,
+  "launch_command": "src/train/train_expert.py configs/experts/e2a_terminal_only.yaml",
+  "started_at": "2026-10-17T04:30:07.576929+00:00",
+  "hardware": "Tinker managed cluster (GPU type not exposed by the API)",
+  "lora_flags": {
+    "train_mlp": true,
+    "train_attn": true,
+    "train_unembed": true
+  },
+  "finished_at": "2026-10-17T04:59:38.041252+00:00",
+  "best_dev_loss": 0.16689313985673607,
+  "selected_checkpoint": "tinker://9440e7d9-7a24-5734-8edc-1525172b3f99:train:0/sampler_weights/e2a_terminal_only_r32_s42_step00148",
+  "selection_rule": "dev_loss_min"
+}

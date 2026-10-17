@@ -1,0 +1,12 @@
+completed success | merge:success, publish:skipped
+merge	Run astral-sh/setup-uv@v5	2026-10-16T20:17:51.8910460Z (node:2072) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are 
+merge	merge + upload	2026-10-16T20:19:35.1259652Z ^[[36;1m  echo "=== merging $cfg"^[[0m
+merge	merge + upload	2026-10-16T20:19:35.1270263Z ^[[36;1mjson.dump(m, open(p, "w"), indent=2); print("uploaded", repo, sha)^[[0m
+merge	merge + upload	2026-10-16T20:19:35.1275141Z ^[[36;1m    except Exception as ex: m[e] = {"repo_id": repo, "error": str(ex)[:200]}^[[0m
+merge	merge + upload	2026-10-16T20:19:35.1642392Z === merging ties_d0.2
+merge	merge + upload	2026-10-16T22:59:42.4562040Z   "n_modules_3d": 120,
+merge	merge + upload	2026-10-16T22:59:42.4567509Z   "svd_rel_error": {
+merge	merge + upload	2026-10-16T22:59:42.4567804Z     "mean": 0.488826721906662,
+merge	merge + upload	2026-10-16T22:59:42.4568109Z     "max": 0.5631819367408752,
+merge	merge + upload	2026-10-16T22:59:42.4571880Z wrote /mnt/work/models/weights/merged_ties_d0.2
+merge	merge + upload	2026-10-16T23:00:22.5612811Z uploaded ssyhw7/qwen36-35b-merged-ties_d0.2 d9ce9d15a9ec5a6de5acc0f7b0cb8682ff862aa5

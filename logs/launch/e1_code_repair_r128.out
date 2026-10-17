@@ -1,0 +1,51 @@
+tokenized 1206 examples, dropped 195 over max_seq_len=32768
+tokenized 128 examples, dropped 27 over max_seq_len=32768
+{
+  "run_id": "e1_code_repair_r128_s42",
+  "config_path": "configs/experts/e1_code_repair_r128.yaml",
+  "n_train_examples": 1206,
+  "n_dev_examples": 128,
+  "n_train_tokens": 20983635,
+  "n_loss_tokens": 4051850.0,
+  "steps_per_epoch": 38,
+  "max_steps": 76,
+  "launch_command": "src/train/train_expert.py configs/experts/e1_code_repair_r128.yaml",
+  "started_at": "2026-10-17T04:30:36.140048+00:00",
+  "hardware": "Tinker managed cluster (GPU type not exposed by the API)"
+}
+Traceback (most recent call last):
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/src/train/train_expert.py", line 259, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/src/train/train_expert.py", line 170, in main
+    client = service.create_lora_training_client(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/lib/sync_only.py", line 75, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/lib/public_interfaces/service_client.py", line 345, in create_lora_training_client
+    ).result()
+      ^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/lib/public_interfaces/api_future.py", line 127, in result
+    return self._future.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/lib/telemetry.py", line 431, in _awrapper
+    return await cast(Callable[..., Awaitable[R]], func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/lib/public_interfaces/service_client.py", line 278, in _create_lora_training_client_async
+    future = await client.models.create(request=request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/resources/models.py", line 30, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/_base_client.py", line 1265, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hanyang/Desktop/Apex-interview/qwen36-merge-takehome/.venv/lib/python3.11/site-packages/tinker/_base_client.py", line 1066, in request
+    raise self._make_status_error_from_response(err.response) from None
+tinker.BadRequestError: Error code: 400 - {'detail': 'lora_config.rank 128 exceeds max LoRA rank 64 for model Qwen/Qwen3.6-35B-A3B'}
