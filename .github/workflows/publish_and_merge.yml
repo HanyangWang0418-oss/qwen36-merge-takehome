@@ -55,28 +55,10 @@ jobs:
           CKPT=$(python3 -c "import json;print(json.load(open('logs/${{ matrix.run }}/metadata.json'))['selected_checkpoint'])")
           REPO="$HF_USER/qwen36-35b-${{ matrix.expert }}"
           echo "pushing $CKPT -> $REPO"
-          cd "$RUNNER_TEMP"
-          if ! timeout 900 uvx --from tinker tinker checkpoint push-hf "$CKPT" --repo "$REPO" --public --commit-message "expert ${{ matrix.expert }} from $CKPT" 2>&1 | tail -20; then
-            echo "push-hf failed or timed out; falling back to download + build_lora_adapter + upload"
-            uv venv "$RUNNER_TEMP/venv" --python 3.11 && . "$RUNNER_TEMP/venv/bin/activate"
-            uv pip install --index-url https://download.pytorch.org/whl/cpu torch >/dev/null
-            uv pip install tinker tinker-cookbook "huggingface_hub[cli]" safetensors >/dev/null
-            python - "$CKPT" "$REPO" "${{ matrix.expert }}" <<'PY'
-          import os, sys, json, tempfile
-          from tinker_cookbook import weights
-          from huggingface_hub import HfApi
-          ckpt, repo, expert = sys.argv[1:4]
-          dl = weights.download(tinker_path=ckpt, output_dir=f"{os.environ['RUNNER_TEMP']}/dl_{expert}")
-          out = f"{os.environ['RUNNER_TEMP']}/peft_{expert}"
-          weights.build_lora_adapter(base_model="Qwen/Qwen3.6-35B-A3B", adapter_path=dl, output_path=out)
-          open(f"{out}/TINKER_SOURCE.txt", "w").write(ckpt + "\n")
-          open(f"{out}/README.md", "w").write(f"---\nlicense: apache-2.0\nbase_model: Qwen/Qwen3.6-35B-A3B\nbase_model_relation: adapter\nlibrary_name: peft\n---\n# {repo.split('/')[-1]}\n\nLoRA adapter exported from Tinker checkpoint `{ckpt}`. Model card to be completed; see https://github.com/HanyangWang0418-oss/qwen36-merge-takehome\n")
-          api = HfApi(token=os.environ["HF_TOKEN"]); api.create_repo(repo, private=False, exist_ok=True)
-          api.upload_folder(folder_path=out, repo_id=repo, commit_message=f"expert {expert} from {ckpt} (cookbook export)")
-          print("uploaded via fallback:", repo, api.model_info(repo).sha)
-          PY
-          fi
-          uvx --from huggingface_hub[cli] hf download "$REPO" adapter_config.json --local-dir "$RUNNER_TEMP/cfg" >/dev/null
+          uv venv "$RUNNER_TEMP/venv" --python 3.11 && . "$RUNNER_TEMP/venv/bin/activate"
+          uv pip install tinker "huggingface_hub[cli]" >/dev/null
+          python scripts/export_checkpoint_to_hf.py "$CKPT" "$REPO" --wait-min 60
+          hf download "$REPO" adapter_config.json --local-dir "$RUNNER_TEMP/cfg" >/dev/null
           python3 - <<PY
           import json; c=json.load(open("$RUNNER_TEMP/cfg/adapter_config.json"))
           print(json.dumps({k:c.get(k) for k in ("r","lora_alpha","target_modules","base_model_name_or_path","peft_type")}, indent=1)[:3000])
