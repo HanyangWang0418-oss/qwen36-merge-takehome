@@ -7,5 +7,5 @@ output_dir: models/weights/merged_ta_l0.7_4experts
 experts:
   - {path: models/weights/e1_code_repair,     lambda: 0.7, layers: null}
   - {path: models/weights/e2a_terminal_only,  lambda: 0.7, layers: null}
-  - {path: models/weights/e2b_research_agent, lambda: 0.7, layers: null}
+  - {path: models/weights/e2b_terminal_swe, lambda: 0.7, layers: null}
   - {path: models/weights/e3_reasoning,       lambda: 0.7, layers: null}

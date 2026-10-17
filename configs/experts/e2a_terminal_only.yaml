@@ -1,10 +1,10 @@
 # Expert training config — e2a_terminal_only
 # Trained on Tinker (LoRA, managed). Every value here is a snapshot of what
 # src/train/train_expert.py sends; logs/<run_id>/metadata.json repeats it.
-expert_name: e2a_terminal_only
+expert_name: e2a_terminal_only   # CONTROL: 4-expert split, pure terminal tasks (TMax, TB1 traces, AgentInstruct os)
 target_benchmark: "terminal_bench_2"
 data_domain: terminal_agent
-data_description: "Terminal / tool-use / research-execution trajectories (Terminal-Bench 1.x minus 2.0 overlap, AgentTuning, synthetic shell + science tasks)"
+data_description: "e2 data restricted to pure terminal sources: TMax-Agent-SFT-terminus, Terminal-Bench 1.x traces (TB2 overlap removed), AgentInstruct os"
 
 base:
   tinker_model: Qwen/Qwen3.6-35B-A3B
@@ -28,7 +28,7 @@ optim:
   weight_decay: 0.0
   batch_size_examples: 32
   max_seq_len: 32768
-  n_train_examples: 7000
+  n_train_examples: 2368
   epochs: 2
   max_steps: null                        # derived: ceil(n_train_examples * epochs / batch_size_examples)
   grad_clip: 1.0
@@ -36,7 +36,7 @@ optim:
 data:
   train_file: data/processed/e2a_terminal_only_train.jsonl
   dev_file: data/processed/e2a_terminal_only_dev.jsonl   # independent dev split, used for checkpoint selection
-  dev_size: 500
+  dev_size: 269
   loss_on: assistant_only
 
 checkpointing:
@@ -46,4 +46,4 @@ checkpointing:
   export: peft_adapter                   # weights.build_lora_adapter -> models/weights/e2a_terminal_only/
 
 seed: 42
-run_id: null                             # set at launch: ${expert_name}_r${rank}_s${seed}_${date}
+run_id: e2a_terminal_only_r32_s42
