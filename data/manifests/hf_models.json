@@ -69,22 +69,28 @@
   "e1_code_repair_r64": {
     "repo_id": "ssyhw7/qwen36-35b-e1_code_repair_r64",
     "revision": "53a29a8c35e434b500a010fb24963359e1b606d0",
-    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e1_code_repair_r64",
-    "role": "control",
-    "adapter_bytes": 4491837369
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e1_code_repair_r64"
   },
   "e2a_terminal_only": {
     "repo_id": "ssyhw7/qwen36-35b-e2a_terminal_only",
     "revision": "685e00c776463e17eb26bdd4e27a0f10e870b0e9",
-    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2a_terminal_only",
-    "role": "control",
-    "adapter_bytes": 2245983739
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2a_terminal_only"
   },
   "e2b_terminal_swe": {
     "repo_id": "ssyhw7/qwen36-35b-e2b_terminal_swe",
     "revision": "857cfc28e8ba2599e65eaa50dae9d58e7365959a",
-    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2b_terminal_swe",
-    "role": "control",
-    "adapter_bytes": 2245983739
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-e2b_terminal_swe"
+  },
+  "merged_ta_l0.7_4experts": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.7_4experts",
+    "revision": "55e40d166ccc45137a452593ef7cb47c650d6ab8",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7_4experts",
+    "method": "task_arithmetic"
+  },
+  "merged_ta_l0.7_r64": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.7_r64",
+    "revision": "d02d86030ab8d4d687b15957ce2628751186572e",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7_r64",
+    "method": "task_arithmetic"
   }
 }

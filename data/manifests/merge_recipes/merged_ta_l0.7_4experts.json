@@ -1,0 +1,120 @@
+{
+  "created_at": "2026-10-17T09:03:21.819564+00:00",
+  "config_path": "configs/merge/ta_l0.7_4experts.yaml",
+  "config": {
+    "method": "task_arithmetic",
+    "density": 1.0,
+    "out_rank": 128,
+    "seed": 0,
+    "output_dir": "models/weights/merged_ta_l0.7_4experts",
+    "experts": [
+      {
+        "path": "models/weights/e1_code_repair",
+        "lambda": 0.7,
+        "layers": null
+      },
+      {
+        "path": "models/weights/e2a_terminal_only",
+        "lambda": 0.7,
+        "layers": null
+      },
+      {
+        "path": "models/weights/e2b_terminal_swe",
+        "lambda": 0.7,
+        "layers": null
+      },
+      {
+        "path": "models/weights/e3_reasoning",
+        "lambda": 0.7,
+        "layers": null
+      }
+    ]
+  },
+  "base_model": "Qwen/Qwen3.6-35B-A3B",
+  "method": "task_arithmetic",
+  "density": 1.0,
+  "out_rank": 128,
+  "experts": [
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e1_code_repair",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 0.7,
+      "layers": "all"
+    },
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e2a_terminal_only",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 0.7,
+      "layers": "all"
+    },
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e2b_terminal_swe",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 0.7,
+      "layers": "all"
+    },
+    {
+      "path": "/home/runner/work/qwen36-merge-takehome/qwen36-merge-takehome/models/weights/e3_reasoning",
+      "r": 32,
+      "alpha": 32.0,
+      "lambda": 0.7,
+      "layers": "all"
+    }
+  ],
+  "n_modules_merged": 431,
+  "n_modules_3d": 120,
+  "n_modules_skipped": 0,
+  "svd_rel_error": {
+    "mean": 0.0,
+    "max": 0.0,
+    "p90": 0.0
+  },
+  "svd_rel_error_by_layer": {
+    "0": 0.0,
+    "1": 0.0,
+    "10": 0.0,
+    "11": 0.0,
+    "12": 0.0,
+    "13": 0.0,
+    "14": 0.0,
+    "15": 0.0,
+    "16": 0.0,
+    "17": 0.0,
+    "18": 0.0,
+    "19": 0.0,
+    "2": 0.0,
+    "20": 0.0,
+    "21": 0.0,
+    "22": 0.0,
+    "23": 0.0,
+    "24": 0.0,
+    "25": 0.0,
+    "26": 0.0,
+    "27": 0.0,
+    "28": 0.0,
+    "29": 0.0,
+    "3": 0.0,
+    "30": 0.0,
+    "31": 0.0,
+    "32": 0.0,
+    "33": 0.0,
+    "34": 0.0,
+    "35": 0.0,
+    "36": 0.0,
+    "37": 0.0,
+    "38": 0.0,
+    "39": 0.0,
+    "4": 0.0,
+    "5": 0.0,
+    "6": 0.0,
+    "7": 0.0,
+    "8": 0.0,
+    "9": 0.0,
+    "other": 0.0
+  },
+  "conflict_handling": "no conflict resolution; opposing deltas cancel additively",
+  "layout_note": "3D MoE modules: task_arithmetic concatenates on the rank axis; SVD-based methods use one joint SVD over stacked experts, both keep the shared-side broadcast layout"
+}
