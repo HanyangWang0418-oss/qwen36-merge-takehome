@@ -29,5 +29,41 @@
     "revision": "d9ce9d15a9ec5a6de5acc0f7b0cb8682ff862aa5",
     "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ties_d0.2",
     "method": "ties"
+  },
+  "merged_ta_l0.5": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.5",
+    "revision": "e8e82e9c9e09e4d6f7f97a381aaa9dbbbff40588",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.5",
+    "method": "task_arithmetic",
+    "out_rank": 96,
+    "adapter_bytes": 6737682760,
+    "private": false
+  },
+  "merged_ta_l1.0": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l1.0",
+    "revision": "f5c091ea82c24cd7c56fcb85a704c8aaa500cd8b",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l1.0",
+    "method": "task_arithmetic",
+    "out_rank": 96,
+    "adapter_bytes": 6737682760,
+    "private": false
+  },
+  "merged_ta_l0.7_layerscope": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.7_layerscope",
+    "revision": "4a09a05c52289105ec259c0dafe103b076f0fa34",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7_layerscope",
+    "method": "task_arithmetic",
+    "out_rank": 96,
+    "adapter_bytes": 6737682760,
+    "private": false
+  },
+  "merged_ta_l0.7_no_e3": {
+    "repo_id": "ssyhw7/qwen36-35b-merged-ta_l0.7_no_e3",
+    "revision": "8a335596ed58121e87cec6d811dffc4e2bbdd0a8",
+    "url": "https://huggingface.co/ssyhw7/qwen36-35b-merged-ta_l0.7_no_e3",
+    "method": "task_arithmetic",
+    "out_rank": 64,
+    "adapter_bytes": 4491829432,
+    "private": false
   }
 }

@@ -131,4 +131,4 @@ jobs:
           git config user.name "github-actions[bot]"; git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/manifests/hf_models.json data/manifests/merge_recipes
           git commit -m "Merged adapters + HF model manifest (Actions run ${{ github.run_id }})" || echo "nothing to commit"
-          git push
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break || sleep 10; done
