@@ -22,7 +22,7 @@ harness:
   harbor_version: ">=0.22"               # pin exact version in requirements.lock
   task_dir: v2/tasks
   container_image_pattern: "ghcr.io/scaleapi/swe-bench_pro-v2:<instance_id>"
-  sandbox_env: e2b                       # 本实验设置: Alibaba Cloud Agent Sandbox 极速版 (E2B-compatible, cn-hangzhou) via harbor `-e e2b`; official protocol uses modal; see docs/infra_aliyun.md
+  sandbox_env: modal                     # official locked-protocol environment; see eval/README.md
 
 agent:
   name: locked_mini_swe:LockedMiniSwe   # self-hosted models use the mini-swe-agent locked agent

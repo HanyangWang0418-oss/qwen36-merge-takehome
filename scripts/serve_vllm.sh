@@ -14,7 +14,7 @@ mkdir -p models/weights
 python3 - <<'PY'
 import json, os, subprocess, sys
 from huggingface_hub import snapshot_download
-m = json.load(open("data/manifests/hf_models.json"))
+m = json.load(open(os.environ.get("HF_MODELS_FILE", "data/manifests/hf_models.json")))
 for name, rec in m.items():
     src = f"models/weights/{name}"
     dst = f"models/weights/{name}_vllm"

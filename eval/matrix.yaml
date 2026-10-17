@@ -1,0 +1,22 @@
+# Evaluation matrix. full = whole benchmark; proxy = dev-proxy screening only (never reported as a benchmark number).
+# Experts are evaluated on their target benchmark(s) (the task statement's minimum); base and the two main merges on all four.
+benchmarks: [swebench_pro_v2_hard, terminal_bench_2, hle, asi_bench]
+models:
+  base:                       {group: base,    full: [swebench_pro_v2_hard, terminal_bench_2, hle, asi_bench]}
+  e1_code_repair:             {group: experts, full: [swebench_pro_v2_hard]}
+  e2_terminal_agent:          {group: experts, full: [terminal_bench_2, asi_bench]}
+  e3_reasoning:               {group: experts, full: [hle]}
+  merged_ta_l0.7:             {group: merged,  full: [swebench_pro_v2_hard, terminal_bench_2, hle, asi_bench]}
+  merged_ties_d0.2:           {group: merged,  full: [swebench_pro_v2_hard, terminal_bench_2, hle, asi_bench]}
+  merged_ta_l0.5:             {group: merged,  proxy: true}
+  merged_ta_l1.0:             {group: merged,  proxy: true}
+  merged_ta_l0.7_layerscope:  {group: merged,  proxy: true}
+  merged_ta_l0.7_no_e3:       {group: merged,  proxy: true}
+  merged_ties_d0.5:           {group: merged,  proxy: true}
+  merged_dare_ties_d0.3:      {group: merged,  proxy: true}
+  merged_ta_l0.7_4experts:    {group: merged,  proxy: true}
+  merged_ta_l0.7_r64:         {group: merged,  proxy: true}
+  e1_code_repair_r64:         {group: experts, proxy: true}
+  e2a_terminal_only:          {group: experts, proxy: true}
+  e2b_terminal_swe:           {group: experts, proxy: true}
+# Promote a proxy winner to full runs by adding it to `full:` and re-running eval/run_all.sh.

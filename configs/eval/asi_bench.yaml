@@ -22,7 +22,7 @@ harness:
   commit: cf07cb89d8590d958ff42db7ae3d6608f5eb9dbc
   cli: asibench
   cli_version: "0.2.0"
-  sandbox: os                             # docker on an Alibaba Cloud ECS VM (asibench needs a Docker daemon); see docs/infra_aliyun.md
+  sandbox: os                             # docker daemon on the GPU box (eval/run_asi_bench.sh)
   python: ">=3.11"
 
 agent:

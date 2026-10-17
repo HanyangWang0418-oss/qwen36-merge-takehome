@@ -14,7 +14,7 @@ harness:
   commit: 2e29ca91d5f1cb6fb60924bf867acc755565c044
   runner: harbor
   harbor_version: LOCK
-  sandbox_env: e2b                       # 本实验设置: Alibaba Cloud Agent Sandbox 极速版 (E2B-compatible, cn-hangzhou) via harbor `-e e2b`; leaderboard uses modal; see docs/infra_aliyun.md
+  sandbox_env: modal                     # leaderboard environment; per-task CPU/memory as run is recorded by eval/run_terminal_bench.sh
 
 agent:
   name: terminus-2
