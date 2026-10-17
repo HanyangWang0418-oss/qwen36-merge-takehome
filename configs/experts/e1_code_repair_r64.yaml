@@ -15,7 +15,7 @@ base:
 method: lora                             # Tinker only offers LoRA; full FT is out of budget (35B MoE)
 lora:
   rank: 64                               # Tinker caps LoRA rank at 64 for Qwen3.6-35B-A3B (128 rejected)
-  alpha: 128                              # Tinker convention alpha = 2 * rank unless overridden
+  alpha: 32                               # exported adapter_config: lora_alpha=32 at r=64 (Tinker keeps alpha fixed at 32, scaling 0.5)
   target_modules: all_linear             # Tinker flags below; exact HF module list read from exported adapter_config.json
   tinker_flags: {train_attn: true, train_mlp: true, train_unembed: true}   # create_lora_training_client kwargs; MoE experts fall under train_mlp
   dropout: 0.0

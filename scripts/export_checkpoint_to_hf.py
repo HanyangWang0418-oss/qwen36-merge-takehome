@@ -94,6 +94,11 @@ def main() -> int:
             f"code, data and evaluation: https://github.com/HanyangWang0418-oss/qwen36-merge-takehome\n")
     if (out / "checkpoint_complete").exists():
         (out / "checkpoint_complete").unlink()
+    cfg_path = out / "adapter_config.json"
+    cfg0 = json.loads(cfg_path.read_text())
+    if not cfg0.get("base_model_name_or_path"):  # save_weights_external leaves it null
+        cfg0["base_model_name_or_path"] = "Qwen/Qwen3.6-35B-A3B"
+        cfg_path.write_text(json.dumps(cfg0, indent=2))
     api = HfApi(token=os.environ["HF_TOKEN"])
     api.create_repo(a.repo_id, private=False, exist_ok=True)
     api.upload_folder(folder_path=str(out), repo_id=a.repo_id, commit_message=f"adapter from {a.tinker_path}")

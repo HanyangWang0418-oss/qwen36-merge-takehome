@@ -178,9 +178,9 @@ def main() -> int:
 
     adapters = [Adapter(ROOT / e["path"] if not Path(e["path"]).is_absolute() else Path(e["path"]),
                         float(e.get("lambda", 1.0)), e.get("layers")) for e in cfg["experts"]]
-    base = adapters[0].cfg["base_model_name_or_path"]
-    for a in adapters:
-        assert a.cfg["base_model_name_or_path"] == base, f"base mismatch: {a.path}"
+    bases = {a.cfg.get("base_model_name_or_path") for a in adapters} - {None, ""}
+    assert len(bases) <= 1, f"base mismatch across adapters: {bases}"
+    base = next(iter(bases)) if bases else "Qwen/Qwen3.6-35B-A3B"
     modules = sorted(set().union(*(set(a.modules) for a in adapters)))
     gen = torch.Generator().manual_seed(seed)
 
