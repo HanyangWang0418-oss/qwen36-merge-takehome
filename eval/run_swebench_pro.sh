@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 set -a; . eval/.env; set +a
 MODEL=$1; GROUP=$2; SUBSET=${4:-}
+SERVED=$MODEL; [ "$MODEL" = base ] && SERVED=${BASE_MODEL_NAME:-base}
 SBP=third_party/SWE-bench_Pro-os
 IDS=${SUBSET:-$SBP/v2/hard51_ids.txt}
 JOB="sbp-hard51-${MODEL}"
@@ -14,7 +15,7 @@ echo "[$(date -u +%FT%TZ)] model=$MODEL tasks=$(wc -l < "$IDS") env=modal agent=
 # agent sandbox is offline except the model host; verifier phase keeps network (Go modules etc.)
 PYTHONPATH=$SBP/v2/tooling harbor run -p $SBP/v2/tasks $(sed 's/^/-i /' "$IDS") \
   -e modal -n "${CONCURRENCY:-20}" -k 1 \
-  -a locked_mini_swe:LockedMiniSwe -m "openai/${MODEL}" \
+  -a locked_mini_swe:LockedMiniSwe -m "openai/${SERVED}" \
   --ak config_file=$SBP/v2/tooling/configs/mini_toolcall.yaml \
   --ae OPENAI_API_KEY="$OPENAI_API_KEY" --ae OPENAI_API_BASE="$OPENAI_API_BASE" \
   --allow-agent-host "$VLLM_HOST" \

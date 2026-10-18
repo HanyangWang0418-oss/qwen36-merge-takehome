@@ -5,12 +5,13 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 set -a; . eval/.env; set +a
 MODEL=$1; GROUP=$2; shift 2
+SERVED=$MODEL; [ "$MODEL" = base ] && SERVED=${BASE_MODEL_NAME:-base}
 TRACK=$(python3 -c "import json;print(json.load(open('data/manifests/asi_bench_tasks.json'))['track'])"); INST=""
 while [ $# -gt 0 ]; do case $1 in --track) TRACK=$2; shift 2;; --instances) INST=$2; shift 2;; *) shift;; esac; done
 docker info >/dev/null 2>&1 || { echo "asibench --sandbox os needs a Docker daemon on this machine"; exit 1; }
 mkdir -p logs/eval eval/agent_configs
 cat > "eval/agent_configs/opencode_${MODEL}.json" <<JSON
-{"model": "${MODEL}", "api_base": "${VLLM_BASE}", "api_key_env": "OPENAI_API_KEY", "api_protocol": "openai", "supports_image_input": false,
+{"model": "${SERVED}", "api_base": "${VLLM_BASE}", "api_key_env": "OPENAI_API_KEY", "api_protocol": "openai", "supports_image_input": false,
  "temperature": 1.0, "top_p": 0.95, "max_tokens": 32768}
 JSON
 [ -d "hf_instances_${TRACK}" ] || asibench task pull --repo "$TRACK" --output-dir "hf_instances_${TRACK}/"

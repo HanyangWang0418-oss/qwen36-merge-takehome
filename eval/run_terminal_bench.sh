@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 set -a; . eval/.env; set +a
 MODEL=$1; GROUP=$2; shift 2
+SERVED=$MODEL; [ "$MODEL" = base ] && SERVED=${BASE_MODEL_NAME:-base}
 SEEDS="1 2 3 4 5"; TASKS=""
 while [ $# -gt 0 ]; do case $1 in --seeds) SEEDS=$2; shift 2;; --tasks) TASKS=$2; shift 2;; *) shift;; esac; done
 TBV=$(python3 -c "import json;print(json.load(open('data/manifests/terminal_bench_2_tasks.json'))['version'])")
@@ -17,7 +18,7 @@ mkdir -p logs/eval
 for SEED in $SEEDS; do
   JOB="tb2-${MODEL}-seed${SEED}"
   echo "[$(date -u +%FT%TZ)] model=$MODEL seed=$SEED cpus=${TB_CPUS} mem_mb=${TB_MEM_MB} env=modal agent=terminus-2 dataset=terminal-bench-2@${TBC:0:8} (v${TBV})" | tee -a logs/eval/${JOB}.log
-  harbor run -p "$TBP" "${TASK_ARGS[@]}" -a terminus-2 -m "openai/${MODEL}" \
+  harbor run -p "$TBP" "${TASK_ARGS[@]}" -a terminus-2 -m "openai/${SERVED}" \
     -e modal -n "${CONCURRENCY:-20}" -k 1 \
     --override-cpus "${TB_CPUS}" --override-memory-mb "${TB_MEM_MB}" \
     --ak api_base="$VLLM_BASE" --ak temperature=1.0 --ak max_thinking_tokens=81920 \
