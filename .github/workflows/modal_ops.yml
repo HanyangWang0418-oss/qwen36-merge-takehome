@@ -24,6 +24,8 @@ on:
 jobs:
   op:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 350
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}

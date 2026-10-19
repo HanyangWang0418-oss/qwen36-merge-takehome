@@ -75,7 +75,6 @@ def prepare_weights(adapters: str = " ".join(HF_MODELS.keys())):
     gpu=GPU,
     scaledown_window=SCALEDOWN_MIN * MIN,
     startup_timeout=30 * MIN,
-    timeout=4 * 3600,
     volumes={"/weights": weights, "/root/.cache/vllm": vllm_cache},
     secrets=[secret],
     port=VLLM_PORT,
