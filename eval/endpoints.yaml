@@ -1,0 +1,9 @@
+# One vLLM endpoint per evaluated model (as deployed on the evaluation box).
+# base_url must be reachable from wherever the agent runs:
+#   - harbor -e modal  -> a PUBLIC url (cloudflared tunnel / public IP); private 10.x addresses do NOT work from Modal
+#   - harbor -e docker -> the private address is fine (agents run on the same network)
+# public_url (optional) overrides base_url for Modal-sandboxed benchmarks.
+base:              {base_url: "http://10.164.228.13:8000/v1", served: qwen36-35b-base,  public_url: ""}
+merged_ta_l0.7:    {base_url: "http://10.164.228.13:8001/v1", served: ta_l07,           public_url: ""}
+merged_ties_d0.2:  {base_url: "http://10.164.228.13:8002/v1", served: ties_d02,         public_url: ""}
+e1_code_repair:    {base_url: "http://10.164.228.13:8003/v1", served: e1_code_repair,   public_url: ""}

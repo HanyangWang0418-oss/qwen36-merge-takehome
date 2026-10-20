@@ -27,6 +27,13 @@ vLLM runs on **our own 2× A100 80GB box** (`eval/serve.sh`, TP=2) and is expose
 tunnel. `eval/modal_vllm.py` / the `modal-ops` workflow (vLLM on a Modal H200) are an **optional alternative that is not
 used**; `eval/modal_driver.py` is only needed if the driving machine cannot reach api.modal.com.
 
+## Per-model endpoints (current deployment)
+Each evaluated model has its own vLLM server, listed in `eval/endpoints.yaml` (base :8000, TA λ0.7 :8001, TIES d0.2 :8002,
+e1 :8003). The runners pick the URL and served name from there. **Before any run: `python3 eval/check_endpoints.py --modal`.**
+It verifies the served id, `max_model_len` (TB2 needs 262144), that each adapter/merge actually changes greedy output vs
+the base, reasoning separation, tool calling, throughput, and that Modal sandboxes can reach the URL. Private 10.x URLs
+are refused for Modal runs: either fill `public_url` (cloudflared tunnel per port) or run with `HARBOR_ENV=docker` on the box.
+
 ## Order of operations
 1. `cp eval/env.example eval/.env` and fill it in; `eval/setup.sh`.
 2. On the GPU box: `eval/serve.sh` (prints the public URL; keep it running under tmux).

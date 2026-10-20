@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.."
 set -a; . eval/.env; set +a
 MODEL=$1; GROUP=$2
 SERVED=$MODEL; [ "$MODEL" = base ] && SERVED=${BASE_MODEL_NAME:-base}   # served-model-name of the base in vLLM
+EP=$(python3 eval/resolve_endpoint.py "$MODEL" $([ "${HARBOR_ENV:-modal}" = modal ] && echo --modal)) || exit 2; [ -n "$EP" ] && eval "$EP"   # per-model endpoint (eval/endpoints.yaml)
 P=configs/eval/dev_proxies.json
 export OPENAI_API_KEY=${OPENAI_API_KEY:-dummy} OPENAI_API_BASE="$VLLM_BASE"
 mkdir -p "results_proxy/$GROUP/$MODEL" logs/eval
@@ -13,14 +14,14 @@ mkdir -p "results_proxy/$GROUP/$MODEL" logs/eval
 uv run python src/eval/proxy_mmlu_pro.py --model "$SERVED" --base "$VLLM_BASE" --out "results_proxy/$GROUP/$MODEL/hle_proxy" 2>&1 | tee -a logs/eval/proxy_${MODEL}.log
 # 2. SWE-bench Verified 15 (Modal, harbor dataset)
 IDS=$(python3 -c "import json;print(' '.join('-i '+t for t in json.load(open('$P'))['swebench_proxy']['tasks']))")
-harbor run -d swebench-verified@1.0 $IDS -a terminus-2 -m "openai/${SERVED}" -e modal -n "${CONCURRENCY:-15}" -k 1 \
+harbor run -d swebench-verified@1.0 $IDS -a terminus-2 -m "openai/${SERVED}" -e "${HARBOR_ENV:-modal}" -n "${CONCURRENCY:-15}" -k 1 \
   --ak api_base="$VLLM_BASE" --ak temperature=0.6 --ak 'llm_call_kwargs={"extra_body":{"top_k":20},"top_p":0.95,"max_tokens":32768}' \
   --ae OPENAI_API_KEY="$OPENAI_API_KEY" --ae OPENAI_API_BASE="$OPENAI_API_BASE" --allow-agent-host "$VLLM_HOST" \
   --job-name "proxy-swev-${MODEL}" -o jobs_proxy 2>&1 | tee -a logs/eval/proxy_${MODEL}.log
 uv run python src/eval/collect_harbor.py "jobs_proxy/proxy-swev-${MODEL}" "results_proxy/$GROUP/$MODEL/swebench_proxy"
 # 3. Terminal-Bench-Pro 20 (Modal), one run, same terminus-2 settings but task.toml resources (screening only)
 IDS=$(python3 -c "import json;print(' '.join('-i '+t for t in json.load(open('$P'))['terminal_bench_proxy']['tasks']))")
-harbor run -d terminal-bench-pro@1.0 $IDS -a terminus-2 -m "openai/${SERVED}" -e modal -n "${CONCURRENCY:-20}" -k 1 \
+harbor run -d terminal-bench-pro@1.0 $IDS -a terminus-2 -m "openai/${SERVED}" -e "${HARBOR_ENV:-modal}" -n "${CONCURRENCY:-20}" -k 1 \
   --ak api_base="$VLLM_BASE" --ak temperature=1.0 --ak max_thinking_tokens=81920 --ak 'llm_call_kwargs={"extra_body":{"top_k":20,"seed":1},"top_p":0.95,"max_tokens":81920}' \
   --ae OPENAI_API_KEY="$OPENAI_API_KEY" --ae OPENAI_API_BASE="$OPENAI_API_BASE" --allow-agent-host "$VLLM_HOST" \
   --job-name "proxy-tbpro-${MODEL}" -o jobs_proxy 2>&1 | tee -a logs/eval/proxy_${MODEL}.log
